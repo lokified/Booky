@@ -65,7 +65,7 @@ fun BookSection(
     books: List<BookDto>
 ) {
 
-    LazyColumn (modifier = Modifier.fillMaxSize()) {
+    LazyColumn (modifier = Modifier.fillMaxSize().padding(bottom = 50.dp)) {
 
         items(books) { book ->
 
