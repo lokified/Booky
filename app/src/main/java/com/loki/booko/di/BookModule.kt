@@ -5,6 +5,7 @@ import com.loki.booko.data.repository.remote.BooksRepositoryImpl
 import com.loki.booko.domain.repository.remote.BooksRepository
 import com.loki.booko.domain.use_cases.books.BookDetailUseCase
 import com.loki.booko.domain.use_cases.books.BookListUseCase
+import com.loki.booko.domain.use_cases.books.BookSearchUseCase
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Constants.BASE_URL
 import dagger.Module
@@ -41,7 +42,8 @@ object BookModule {
     fun provideBookUseCase(repository: BooksRepository): BookUseCase {
         return BookUseCase(
             getBookList = BookListUseCase(repository),
-            getBookDetail = BookDetailUseCase(repository)
+            getBookDetail = BookDetailUseCase(repository),
+            getBookSearch = BookSearchUseCase(repository)
         )
     }
 }

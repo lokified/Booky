@@ -16,18 +16,26 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.BookItem
-import com.loki.booko.presentation.common.TopBar
+import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    searchTerm: String = ""
 ) {
+
+    if (searchTerm.isNotEmpty()) {
+        viewModel.searchBook(searchTerm.trim())
+    }
 
     Scaffold(
         topBar = {
-            TopBar(title = "All Books")
+            AppTopBar(
+                title = "All Books",
+                navController = navController
+            )
         }
     ) {
 
@@ -37,7 +45,9 @@ fun HomeScreen(
 
             val state = viewModel.bookState.value
 
-            BookSection(books = state.bookList)
+            if (state.bookList.isNotEmpty()) {
+                BookSection(books = state.bookList)
+            }
 
             if (state.errorMessage.isNotBlank()) {
                 Text(
@@ -65,7 +75,11 @@ fun BookSection(
     books: List<BookDto>
 ) {
 
-    LazyColumn (modifier = Modifier.fillMaxSize().padding(bottom = 50.dp)) {
+    LazyColumn (
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 50.dp)
+    ) {
 
         items(books) { book ->
 

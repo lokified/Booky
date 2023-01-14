@@ -1,11 +1,9 @@
 package com.loki.booko.presentation.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
+import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.loki.booko.presentation.favorite.FavoriteScreen
 import com.loki.booko.presentation.home.components.HomeScreen
 import com.loki.booko.presentation.search.SearchScreen
@@ -16,23 +14,32 @@ fun Navigation(
     navController: NavHostController
 ) {
 
+
     NavHost(navController = navController, startDestination = NavGraph.HomeScreen.route ) {
 
+        var term = ""
+
+        composable(route = NavGraph.SearchScreen.route) {
+            SearchScreen(
+                navController = navController
+            ) {
+                term = it
+            }
+        }
+
         composable(route = NavGraph.HomeScreen.route) {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, searchTerm = term)
         }
 
         composable(route = NavGraph.FavoriteScreen.route) {
-            FavoriteScreen()
+            FavoriteScreen(navController = navController)
         }
 
         composable(route = NavGraph.SettingsScreen.route) {
-            SettingsScreen()
+            SettingsScreen(navController = navController)
         }
 
-        composable(route = NavGraph.SearchScreen.route) {
-            SearchScreen()
-        }
+
     }
 }
 
@@ -43,4 +50,5 @@ sealed class NavGraph(val route: String) {
     object FavoriteScreen: NavGraph("Favorite_screen")
     object SettingsScreen: NavGraph("Settings_screen")
     object SearchScreen: NavGraph("Search_screen")
+    object BookDetailScreen: NavGraph("Book_detail_screen")
 }

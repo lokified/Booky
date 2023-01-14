@@ -18,4 +18,8 @@ class BooksRepositoryImpl @Inject constructor(
     override suspend fun getBookDetail(bookId: Int): Book {
         return bookApi.getBookDetail(bookId)
     }
+
+    override suspend fun searchBook(term: String): BookResponse? {
+        return bookApi.searchBook(term)
+    }
 }

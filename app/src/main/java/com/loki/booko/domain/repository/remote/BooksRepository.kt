@@ -8,4 +8,6 @@ interface BooksRepository {
     suspend fun getBooks(): BookResponse
 
     suspend fun getBookDetail(bookId: Int): Book
+
+    suspend fun searchBook(term: String): BookResponse?
 }

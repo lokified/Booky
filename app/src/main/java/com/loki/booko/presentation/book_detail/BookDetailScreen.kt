@@ -1,4 +1,4 @@
-package com.loki.booko.presentation.favorite
+package com.loki.booko.presentation.book_detail
 
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -6,19 +6,20 @@ import androidx.navigation.NavController
 import com.loki.booko.presentation.common.AppTopBar
 
 @Composable
-fun FavoriteScreen(
+fun BookDetailScreen(
     navController: NavController
 ) {
 
-    Scaffold(
+    Scaffold (
         topBar = {
             AppTopBar(
-                title = "Favorites",
+                title = "Book Details",
                 navController = navController
             )
         }
-    ) {
+    ){
 
 
     }
+
 }
