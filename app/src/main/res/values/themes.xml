@@ -4,4 +4,13 @@
     <style name="Theme.Booko" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/status_bar_color</item>
     </style>
+
+    <style name="Theme.Booko.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Booko.AppBarOverlay" parent="Theme.Booko.NoActionBar" />
+
+    <style name="Theme.Booko.PopupOverlay" parent="Theme.Booko.NoActionBar" />
 </resources>

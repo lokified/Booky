@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color  name="status_bar_color">#212529</color>
+    <color name="icon_dark">#A3B18A</color>
+    <color name="background_dark">#344E41</color>
+    <color name="icon_light">#F8F9FA</color>
+    <color name="background_light">#212529</color>
 </resources>
