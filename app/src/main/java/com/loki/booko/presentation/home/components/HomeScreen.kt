@@ -8,6 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -44,18 +45,18 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) {
 
-            val state = viewModel.bookState.value
+            val state = viewModel.bookState.collectAsState()
 
-            if (state.bookList.isNotEmpty()) {
+            if (state.value.bookList.isNotEmpty()) {
                 BookSection(
-                    books = state.bookList,
+                    books = state.value.bookList,
                     navController = navController
                 )
             }
 
-            if (state.errorMessage.isNotBlank()) {
+            if (state.value.errorMessage.isNotBlank()) {
                 Text(
-                    text = state.errorMessage,
+                    text = state.value.errorMessage,
                     color = MaterialTheme.colors.error,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -65,7 +66,7 @@ fun HomeScreen(
                 )
             }
 
-            if (state.isLoading) {
+            if (state.value.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )

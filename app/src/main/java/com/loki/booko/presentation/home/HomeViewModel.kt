@@ -1,7 +1,5 @@
 package com.loki.booko.presentation.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.loki.booko.domain.models.Term
@@ -9,7 +7,8 @@ import com.loki.booko.domain.repository.local.SearchTermRepository
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -21,8 +20,8 @@ class HomeViewModel @Inject constructor(
     private val searchTermRepository: SearchTermRepository
 ): ViewModel() {
 
-    private val _bookState = mutableStateOf(HomeState())
-    val bookState: State<HomeState> = _bookState
+    private val _bookState = MutableStateFlow(HomeState())
+    val bookState = _bookState.asStateFlow()
 
     init {
         getBooks()
@@ -69,13 +68,6 @@ class HomeViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-
-                    val termS = Term(
-                        id = 0,
-                        searchTerm = term
-                    )
-                    searchTermRepository.saveSearchTerm(termS)
-
                     _bookState.value = HomeState(
                         bookList = result.data ?: emptyList()
                     )

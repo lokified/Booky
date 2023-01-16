@@ -45,6 +45,7 @@ fun SearchScreen(
                 if (term.isNotEmpty()) {
                     navController.popBackStack()
                     onTermSearched(term)
+                    viewModel.saveSearchTerm(term)
                     keyboardController?.hide()
                 }
             },

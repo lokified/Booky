@@ -1,17 +1,16 @@
 package com.loki.booko.presentation.book_detail
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +31,28 @@ fun BookDetailScreen(
 
     val state = viewModel.bookDetailState.value
 
+    val favoriteBookState = viewModel.favoriteBook.collectAsState()
+
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(key1 = true) {
+
+        if (favoriteBookState.value.isLoading) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = "Saving",
+                duration = SnackbarDuration.Long
+            )
+        }
+
+        if (favoriteBookState.value.message.isNotEmpty()) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = favoriteBookState.value.message,
+                duration = SnackbarDuration.Long
+            )
+        }
+    }
+
+
     Scaffold (
         topBar = {
             AppTopBar(
@@ -47,7 +68,8 @@ fun BookDetailScreen(
             state.book?.let {
                 BottomSection(bookDto = it)
             }
-        }
+        },
+        scaffoldState = scaffoldState
     ){
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -88,6 +110,28 @@ fun BookDetailScreen(
                             fontSize = 18.sp,
                             modifier = Modifier.padding(16.dp),
                         )
+                    }
+
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+
+                        viewModel.getBookIsRead(state.book!!)
+
+                        if (!viewModel.isRead.value) {
+                            TextButton(
+                                onClick = {
+                                    viewModel.saveAsFavorite(state.book)
+                                }
+                            ) {
+
+                                Icon(
+                                    imageVector = Icons.Default.Favorite,
+                                    contentDescription = "Favorite"
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = "Save to Favorite")
+                            }
+                        }
+
                     }
                 }
             }
@@ -153,7 +197,7 @@ fun TopSection(
 
                 val authors = bookDto.author?.map { it.name }?.joinToString(separator = ",")
                 Text(
-                    text = "Author(s): $authors",
+                    text = "Author(s) | $authors",
                     fontSize = 15.sp,
                     fontStyle = FontStyle.Italic,
                     maxLines = 2
@@ -162,7 +206,7 @@ fun TopSection(
                 val languages = bookDto.languages.joinToString(separator = ",")
 
                 Text(
-                    text = "Language(s): $languages",
+                    text = "Language(s) | $languages",
                     fontSize = 16.sp,
                     maxLines = 2
                 )

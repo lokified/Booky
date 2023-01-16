@@ -23,6 +23,16 @@ class SearchViewModel @Inject constructor(
         getSearchTermList()
     }
 
+    fun saveSearchTerm(term: String) {
+        viewModelScope.launch {
+            val termS = Term(
+                id = 0,
+                searchTerm = term
+            )
+            searchTermRepository.saveSearchTerm(termS)
+        }
+    }
+
     private fun getSearchTermList() {
         viewModelScope.launch {
             searchTermRepository.getAllTerms().collectLatest {
