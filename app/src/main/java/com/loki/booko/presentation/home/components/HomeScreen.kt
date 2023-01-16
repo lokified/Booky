@@ -18,6 +18,7 @@ import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
+import com.loki.booko.presentation.navigation.NavGraph
 
 @Composable
 fun HomeScreen(
@@ -46,7 +47,10 @@ fun HomeScreen(
             val state = viewModel.bookState.value
 
             if (state.bookList.isNotEmpty()) {
-                BookSection(books = state.bookList)
+                BookSection(
+                    books = state.bookList,
+                    navController = navController
+                )
             }
 
             if (state.errorMessage.isNotBlank()) {
@@ -72,7 +76,8 @@ fun HomeScreen(
 
 @Composable
 fun BookSection(
-    books: List<BookDto>
+    books: List<BookDto>,
+    navController: NavController
 ) {
 
     LazyColumn (
@@ -85,7 +90,10 @@ fun BookSection(
 
             BookItem(
                 bookDto = book,
-                modifier = Modifier.padding(horizontal = 16.dp,  vertical = 12.dp)
+                modifier = Modifier.padding(horizontal = 16.dp,  vertical = 12.dp),
+                onItemClick = {
+                    navController.navigate(NavGraph.BookDetailScreen.navWithArgs(book.id))
+                }
             )
         }
     }

@@ -3,17 +3,17 @@ package com.loki.booko.data.remote.response
 import com.loki.booko.domain.models.BookDto
 
 data class Book(
-    val authors: List<Author>,
-    val bookshelves: List<String>,
-    val copyright: Boolean,
-    val download_count: Int,
-    val formats: Formats,
     val id: Int,
-    val languages: List<String>,
-    val media_type: String,
-    val subjects: List<String>,
     val title: String,
-    val translators: List<Translator>
+    val authors: List<Author>,
+    val translators: List<Translator>,
+    val subjects: List<String>,
+    val bookshelves: List<String>,
+    val languages: List<String>,
+    val copyright: Boolean,
+    val media_type: String,
+    val formats: Formats,
+    val download_count: Int
 )
 
 fun Book.toBookDto(): BookDto {

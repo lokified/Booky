@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +26,8 @@ import com.loki.booko.presentation.navigation.NavGraph
 fun AppTopBar(
     title: String,
     navController: NavController,
-    onMoreIconClicked: () -> Unit = {}
+    onMoreIconClicked: () -> Unit = {},
+    onFavoriteClicked: () -> Unit = {}
 ) {
 
     TopAppBar(
@@ -51,6 +54,7 @@ fun AppTopBar(
 
             val searchDestination = currentDestination?.route == NavGraph.HomeScreen.route
             val favoriteDestination = currentDestination?.route == NavGraph.FavoriteScreen.route
+            val bookDetailDestination = currentDestination?.route == NavGraph.BookDetailScreen.route
 
             if(searchDestination) {
 
@@ -71,6 +75,15 @@ fun AppTopBar(
                     icon = Icons.Default.MoreVert
                 )
             }
+
+            if (bookDetailDestination) {
+
+                TopBarIcon(
+                    onIconClicked = { onFavoriteClicked() },
+                    description = "Favorite",
+                    icon = Icons.Default.Favorite
+                )
+            }
         }
     }
 }
@@ -80,7 +93,8 @@ fun TopBarIcon(
     modifier: Modifier = Modifier,
     onIconClicked: () -> Unit,
     description: String,
-    icon: ImageVector
+    icon: ImageVector,
+    tint: Color = MaterialTheme.colors.onSurface
 ) {
 
     IconButton(
@@ -92,7 +106,7 @@ fun TopBarIcon(
             contentDescription = description,
             modifier = modifier
                 .padding(4.dp),
-            tint = MaterialTheme.colors.onSurface
+            tint = tint
         )
     }
 

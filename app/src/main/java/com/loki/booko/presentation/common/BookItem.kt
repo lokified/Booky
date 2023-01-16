@@ -2,6 +2,7 @@ package com.loki.booko.presentation.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -25,7 +26,8 @@ import com.loki.booko.domain.models.BookDto
 @Composable
 fun BookItem(
     modifier: Modifier = Modifier,
-    bookDto: BookDto
+    bookDto: BookDto,
+    onItemClick: (BookDto) -> Unit
 ) {
 
     Box(
@@ -34,6 +36,7 @@ fun BookItem(
             .height(200.dp)
             .shadow(elevation = 1.dp)
             .clip(RoundedCornerShape(5.dp))
+            .clickable { onItemClick(bookDto) }
     ) {
 
         Row(
