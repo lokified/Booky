@@ -55,6 +55,7 @@ class BookDetailViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
+                    delay(1000L)
                     val bookInfoList = googleBookRepository.getBookInfo(result.data?.title!!)
 
                     if(bookInfoList?.isEmpty() == true) {

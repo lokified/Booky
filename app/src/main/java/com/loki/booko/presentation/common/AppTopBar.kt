@@ -1,17 +1,13 @@
 package com.loki.booko.presentation.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,8 +22,8 @@ import com.loki.booko.presentation.navigation.NavGraph
 fun AppTopBar(
     title: String,
     navController: NavController,
-    onMoreIconClicked: () -> Unit = {},
-    onFavoriteClicked: () -> Unit = {}
+    onFavoriteClicked: () -> Unit = {},
+    onDeleteAllClicked: () -> Unit = {}
 ) {
 
     TopAppBar(
@@ -69,11 +65,43 @@ fun AppTopBar(
 
             if(favoriteDestination) {
 
-                TopBarIcon(
-                    onIconClicked = { onMoreIconClicked() },
-                    description = "More",
-                    icon = Icons.Default.MoreVert
-                )
+                var menuExpanded by remember {
+                    mutableStateOf(false)
+                }
+
+                Column {
+                    TopBarIcon(
+                        onIconClicked = { menuExpanded = !menuExpanded},
+                        description = "More",
+                        icon = Icons.Default.MoreVert
+                    )
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+
+                        DropdownMenuItem(
+                            onClick = {
+                                navController.navigate(NavGraph.SearchScreen.route)
+                            }
+                        ) {
+                            Text(text = "Search")
+                        }
+
+                        DropdownMenuItem(
+                            onClick = {
+                                onDeleteAllClicked()
+                                menuExpanded = false
+                            }
+                        ) {
+                            Text(
+                                text = "Delete All",
+                                color = MaterialTheme.colors.error
+                            )
+                        }
+                    }
+                }
             }
 
             if (bookDetailDestination) {
@@ -81,7 +109,7 @@ fun AppTopBar(
                 TopBarIcon(
                     onIconClicked = { onFavoriteClicked() },
                     description = "Favorite",
-                    icon = Icons.Default.Favorite
+                    icon = Icons.Default.MoreVert
                 )
             }
         }

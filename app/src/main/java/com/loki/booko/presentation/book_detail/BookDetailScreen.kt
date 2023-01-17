@@ -22,6 +22,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.AppTopBar
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun BookDetailScreen(
@@ -37,18 +38,21 @@ fun BookDetailScreen(
 
     LaunchedEffect(key1 = true) {
 
-        if (favoriteBookState.value.isLoading) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = "Saving",
-                duration = SnackbarDuration.Long
-            )
-        }
+        viewModel.favoriteBook.collectLatest { state ->
 
-        if (favoriteBookState.value.message.isNotEmpty()) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = favoriteBookState.value.message,
-                duration = SnackbarDuration.Long
-            )
+            if (state.isLoading) {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = "Saving",
+                    duration = SnackbarDuration.Long
+                )
+            }
+
+            if (state.message.isNotEmpty()) {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = favoriteBookState.value.message,
+                    duration = SnackbarDuration.Long
+                )
+            }
         }
     }
 
@@ -116,20 +120,24 @@ fun BookDetailScreen(
 
                         viewModel.getBookIsRead(state.book!!)
 
-                        if (!viewModel.isRead.value) {
-                            TextButton(
-                                onClick = {
+                        val isRead = viewModel.isRead.value
+
+                        val favText = if (isRead) "Favorite" else "Save to Favorite"
+
+                        TextButton(
+                            onClick = {
+                                if (!isRead) {
                                     viewModel.saveAsFavorite(state.book)
                                 }
-                            ) {
-
-                                Icon(
-                                    imageVector = Icons.Default.Favorite,
-                                    contentDescription = "Favorite"
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "Save to Favorite")
                             }
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Favorite"
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = favText)
                         }
 
                     }

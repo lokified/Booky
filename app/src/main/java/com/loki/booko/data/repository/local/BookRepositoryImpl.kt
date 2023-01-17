@@ -27,4 +27,8 @@ class BookRepositoryImpl (
     override suspend fun deleteBook(book: BookDto) {
         bookDao.deleteBook(book)
     }
+
+    override suspend fun deleteAll() {
+        bookDao.deleteAll()
+    }
 }

@@ -40,4 +40,10 @@ class FavoriteViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteAll() {
+        viewModelScope.launch {
+            bookRepository.deleteAll()
+        }
+    }
 }

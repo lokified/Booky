@@ -11,4 +11,6 @@ interface BookRepository {
     suspend fun saveBook(book: BookDto)
 
     suspend fun deleteBook(book: BookDto)
+
+    suspend fun deleteAll()
 }
