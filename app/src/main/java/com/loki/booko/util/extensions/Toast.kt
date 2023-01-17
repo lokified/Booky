@@ -1,9 +1,12 @@
 package com.loki.booko.util.extensions
 
-import android.app.Activity
-import android.widget.Toast
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.appcompat.app.AppCompatActivity
 
 
-fun Activity.showToast(content: String) {
-    Toast.makeText(this, content, Toast.LENGTH_LONG).show()
+fun Context.getActivity(): AppCompatActivity? = when (this) {
+    is AppCompatActivity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
 }

@@ -1,5 +1,7 @@
 package com.loki.booko.presentation.book_detail
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -9,8 +11,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,9 +25,15 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.loki.booko.domain.models.BookDto
+import com.loki.booko.presentation.MainActivity
 import com.loki.booko.presentation.common.AppTopBar
+import com.loki.booko.util.extensions.getActivity
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
+@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun BookDetailScreen(
     navController: NavController,
@@ -35,6 +45,10 @@ fun BookDetailScreen(
     val favoriteBookState = viewModel.favoriteBook.collectAsState()
 
     val scaffoldState = rememberScaffoldState()
+
+    val context = LocalContext.current
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
 
@@ -70,7 +84,21 @@ fun BookDetailScreen(
         bottomBar = {
 
             state.book?.let {
-                BottomSection(bookDto = it)
+                BottomSection(
+                    bookDto = it,
+                    onDowloadClick = {
+                        val message = viewModel.downloadBook(
+                            book = it,
+                            activity = (context.getActivity() as MainActivity)
+                        )
+
+                        coroutineScope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                message = message
+                            )
+                        }
+                    }
+                )
             }
         },
         scaffoldState = scaffoldState
@@ -226,7 +254,8 @@ fun TopSection(
 @Composable
 fun BottomSection(
     modifier: Modifier = Modifier,
-    bookDto: BookDto
+    bookDto: BookDto,
+    onDowloadClick: () -> Unit
 ) {
 
     Box(modifier = modifier
@@ -251,7 +280,7 @@ fun BottomSection(
             Spacer(modifier = Modifier.weight(1f))
 
             IconButton(
-                onClick = {  }
+                onClick = { onDowloadClick() }
             ) {
 
                 Icon(
