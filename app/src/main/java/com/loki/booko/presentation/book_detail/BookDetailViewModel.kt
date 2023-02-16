@@ -130,7 +130,6 @@ class BookDetailViewModel @Inject constructor(
     }
     
     @SuppressLint("Range")
-    @RequiresApi(Build.VERSION_CODES.M)
     fun downloadBook(book: BookDto, activity: MainActivity): String {
 
         if (activity.checkStoragePermission()) {

@@ -1,7 +1,5 @@
 package com.loki.booko.presentation.book_detail
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -33,7 +31,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.coroutines.coroutineContext
 
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun BookDetailScreen(
     navController: NavController,
@@ -86,7 +83,7 @@ fun BookDetailScreen(
             state.book?.let {
                 BottomSection(
                     bookDto = it,
-                    onDowloadClick = {
+                    onDownloadClick = {
                         val message = viewModel.downloadBook(
                             book = it,
                             activity = (context.getActivity() as MainActivity)
@@ -255,7 +252,7 @@ fun TopSection(
 fun BottomSection(
     modifier: Modifier = Modifier,
     bookDto: BookDto,
-    onDowloadClick: () -> Unit
+    onDownloadClick: () -> Unit
 ) {
 
     Box(modifier = modifier
@@ -280,7 +277,7 @@ fun BottomSection(
             Spacer(modifier = Modifier.weight(1f))
 
             IconButton(
-                onClick = { onDowloadClick() }
+                onClick = { onDownloadClick() }
             ) {
 
                 Icon(

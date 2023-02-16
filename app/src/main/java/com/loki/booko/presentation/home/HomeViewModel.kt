@@ -3,7 +3,9 @@ package com.loki.booko.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.loki.booko.domain.models.Term
+import com.loki.booko.domain.repository.local.BookRepository
 import com.loki.booko.domain.repository.local.SearchTermRepository
+import com.loki.booko.domain.repository.remote.BooksRepository
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,21 +18,22 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val bookUseCase: BookUseCase,
-    private val searchTermRepository: SearchTermRepository
+    private val booksRepository: BooksRepository,
 ): ViewModel() {
 
     private val _bookState = MutableStateFlow(HomeState())
     val bookState = _bookState.asStateFlow()
 
     init {
-        getBooks()
+        viewModelScope.launch {
+            getBooks()
+        }
     }
 
 
-    private fun getBooks() {
+    private suspend fun getBooks() {
 
-        bookUseCase.getBookList().onEach { result ->
+        booksRepository.getBooks().onEach { result ->
 
             when(result) {
 
@@ -55,11 +58,11 @@ class HomeViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun searchBook(term: String) {
+    suspend fun searchBook(term: String) {
 
-        bookUseCase.getBookSearch(term).onEach { result ->
+        booksRepository.searchBook(term).onEach { result ->
 
-            when(result) {
+            when (result) {
 
                 is Resource.Loading -> {
                     _bookState.value = HomeState(

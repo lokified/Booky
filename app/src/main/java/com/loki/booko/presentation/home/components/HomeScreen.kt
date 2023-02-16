@@ -7,19 +7,22 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.NavGraph
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -28,8 +31,12 @@ fun HomeScreen(
     searchTerm: String = ""
 ) {
 
-    if (searchTerm.isNotEmpty()) {
-        viewModel.searchBook(searchTerm.trim())
+    val term by remember { mutableStateOf(searchTerm) }
+
+    LaunchedEffect(key1 = true) {
+        if (term.isNotEmpty()) {
+            viewModel.searchBook(term)
+        }
     }
 
     Scaffold(
@@ -39,7 +46,7 @@ fun HomeScreen(
                 navController = navController
             )
         }
-    ) {
+    ) { padding ->
 
         Box(
             modifier = Modifier.fillMaxSize()

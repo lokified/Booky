@@ -1,5 +1,6 @@
 package com.loki.booko.presentation.navigation
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,6 +14,8 @@ import com.loki.booko.presentation.search.SearchScreen
 import com.loki.booko.presentation.settings.SettingsScreen
 import com.loki.booko.util.Constants.BOOK_ID
 
+
+@ExperimentalAnimationApi
 @Composable
 fun Navigation(
     navController: NavHostController
@@ -23,7 +26,9 @@ fun Navigation(
 
         var term = ""
 
-        composable(route = NavGraph.SearchScreen.route) {
+        composable(
+            route = NavGraph.SearchScreen.route
+        ) {
             SearchScreen(
                 navController = navController
             ) {

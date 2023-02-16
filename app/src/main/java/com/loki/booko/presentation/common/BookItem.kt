@@ -86,7 +86,7 @@ fun BookItem(
 }
 
 fun firstFour(arr: List<String>) : List<String> {
-    return arr.take(4)
+    return arr.take(2)
 }
 
 @OptIn(ExperimentalCoilApi::class)

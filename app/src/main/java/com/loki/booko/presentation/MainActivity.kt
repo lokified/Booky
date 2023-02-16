@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    @RequiresApi(Build.VERSION_CODES.M)
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                             onItemClick = { navController.navigate(it.route) }
                         )
                     }
-                ) {
+                ) { padding ->
                     Navigation(
                         navController = navController
                     )
@@ -67,7 +68,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.M)
     fun checkStoragePermission(): Boolean {
 
         return if (checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {

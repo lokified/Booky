@@ -7,8 +7,6 @@ import com.loki.booko.data.repository.remote.GoogleBookRepositoryImpl
 import com.loki.booko.domain.repository.remote.BooksRepository
 import com.loki.booko.domain.repository.remote.GoogleBookRepository
 import com.loki.booko.domain.use_cases.books.BookDetailUseCase
-import com.loki.booko.domain.use_cases.books.BookListUseCase
-import com.loki.booko.domain.use_cases.books.BookSearchUseCase
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Constants.BOOK_BASE_URL
 import com.loki.booko.util.Constants.GOOGLE_BASE_URL
@@ -62,9 +60,7 @@ object BookModule {
     @Provides
     fun provideBookUseCase(repository: BooksRepository): BookUseCase {
         return BookUseCase(
-            getBookList = BookListUseCase(repository),
-            getBookDetail = BookDetailUseCase(repository),
-            getBookSearch = BookSearchUseCase(repository)
+            getBookDetail = BookDetailUseCase(repository)
         )
     }
 }
