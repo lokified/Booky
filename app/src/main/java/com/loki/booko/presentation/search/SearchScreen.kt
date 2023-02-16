@@ -44,13 +44,14 @@ fun SearchScreen(
             onClick = {
                 if (term.isNotEmpty()) {
                     navController.popBackStack()
-                    onTermSearched(term)
-                    viewModel.saveSearchTerm(term)
+                    onTermSearched(term.trim())
+                    viewModel.saveSearchTerm(term.trim())
                     keyboardController?.hide()
                 }
             },
-            enteredTerm = { term = it },
-            modifier = Modifier.padding(top = 16.dp)
+            onTermChange = { term = it },
+            modifier = Modifier.padding(top = 16.dp),
+            term = term
         )
 
         Spacer(modifier = Modifier.height(50.dp))
@@ -81,7 +82,8 @@ fun SearchScreen(
 fun SearchTextFieldSection(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    enteredTerm: (String) -> Unit
+    onTermChange: (String) -> Unit,
+    term: String
 ) {
     
     Box(
@@ -94,16 +96,10 @@ fun SearchTextFieldSection(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            var text by remember {
-                mutableStateOf("")
-            }
             
             TextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                    enteredTerm(it)
-                                },
+                value = term,
+                onValueChange = { onTermChange(it) },
                 placeholder = {
                     Text(
                         text = "Enter keywords eg. romance",
