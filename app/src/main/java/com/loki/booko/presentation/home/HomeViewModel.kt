@@ -2,11 +2,7 @@ package com.loki.booko.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.loki.booko.domain.models.Term
-import com.loki.booko.domain.repository.local.BookRepository
-import com.loki.booko.domain.repository.local.SearchTermRepository
 import com.loki.booko.domain.repository.remote.BooksRepository
-import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +29,7 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun getBooks() {
 
-        booksRepository.getBooks().onEach { result ->
+        booksRepository.getBooks(9).onEach { result ->
 
             when(result) {
 

@@ -9,7 +9,9 @@ import retrofit2.http.Query
 interface BookApi {
 
     @GET("books")
-    suspend fun getBooks(): BookResponse
+    suspend fun getBooks(
+        @Query("page") page: Int
+    ): BookResponse
 
     @GET("books/{id}")
     suspend fun getBookDetail(

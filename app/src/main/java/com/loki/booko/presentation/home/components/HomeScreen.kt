@@ -10,19 +10,16 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.NavGraph
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -49,7 +46,9 @@ fun HomeScreen(
     ) { padding ->
 
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
         ) {
 
             val state = viewModel.bookState.collectAsState()
@@ -62,14 +61,9 @@ fun HomeScreen(
             }
 
             if (state.value.errorMessage.isNotBlank()) {
-                Text(
-                    text = state.value.errorMessage,
-                    color = MaterialTheme.colors.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .align(Alignment.Center)
+                ErrorSection(
+                    message = state.value.errorMessage,
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
@@ -80,6 +74,22 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun ErrorSection(
+    modifier: Modifier = Modifier,
+    message: String,
+    color: Color = MaterialTheme.colors.error,
+) {
+    Text(
+        text = message,
+        color = color,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+    )
 }
 
 @Composable
