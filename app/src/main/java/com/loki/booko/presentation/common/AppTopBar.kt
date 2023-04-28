@@ -4,11 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.loki.booko.presentation.navigation.NavGraph
+import com.loki.booko.presentation.navigation.Screens
 
 @Composable
 fun AppTopBar(
@@ -29,35 +27,27 @@ fun AppTopBar(
     TopAppBar(
         modifier = Modifier.background(
             color = MaterialTheme.colors.surface
-        )
-    ) {
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-
+        ),
+        title = {
             Text(
-                text = title, fontSize = 18.sp,
+                text = title,
+                fontSize = 18.sp,
                 color = MaterialTheme.colors.onSurface
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
+            ) },
+        actions = {
             val backStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = backStackEntry?.destination
 
-            val searchDestination = currentDestination?.route == NavGraph.HomeScreen.route
-            val favoriteDestination = currentDestination?.route == NavGraph.FavoriteScreen.route
-            val bookDetailDestination = currentDestination?.route == NavGraph.BookDetailScreen.route
+            val searchDestination = currentDestination?.route == Screens.HomeScreen.route
+            val favoriteDestination = currentDestination?.route == Screens.FavoriteScreen.route
+            val bookDetailDestination = currentDestination?.route == Screens.BookDetailScreen.route
 
             if(searchDestination) {
 
                 TopBarIcon(
                     onIconClicked = {
-                        navController.navigate(NavGraph.SearchScreen.route)
-                                    },
+                        navController.navigate(Screens.SearchScreen.route)
+                    },
                     description = "Search",
                     icon = Icons.Default.Search
                 )
@@ -69,7 +59,7 @@ fun AppTopBar(
                     mutableStateOf(false)
                 }
 
-                Column {
+                Box {
                     TopBarIcon(
                         onIconClicked = { menuExpanded = !menuExpanded},
                         description = "More",
@@ -83,7 +73,7 @@ fun AppTopBar(
 
                         DropdownMenuItem(
                             onClick = {
-                                navController.navigate(NavGraph.SearchScreen.route)
+                                navController.navigate(Screens.SearchScreen.route)
                             }
                         ) {
                             Text(text = "Search")
@@ -113,7 +103,7 @@ fun AppTopBar(
                 )
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -137,5 +127,4 @@ fun TopBarIcon(
             tint = tint
         )
     }
-
 }

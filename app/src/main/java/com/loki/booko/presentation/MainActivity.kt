@@ -3,31 +3,32 @@ package com.loki.booko.presentation
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
-import android.os.Build
+import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.loki.booko.presentation.components.BottomNav
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.Navigation
 import com.loki.booko.presentation.theme.BookoTheme
+import com.loki.booko.util.SnackbarManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -47,18 +48,18 @@ class MainActivity : AppCompatActivity() {
         setContent {
             BookoTheme {
 
-                val navController = rememberNavController()
+                val appState = rememberAppState()
 
                 Scaffold(
                     bottomBar = {
                         BottomNav(
-                            navController = navController,
-                            onItemClick = { navController.navigate(it.route) }
+                            navController = appState.navController,
+                            onItemClick = { appState.navigate(it.route) }
                         )
                     }
                 ) { padding ->
                     Navigation(
-                        navController = navController
+                        appState = appState
                     )
                 }
             }
@@ -78,4 +79,29 @@ class MainActivity : AppCompatActivity() {
             ); false
         }
     }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun rememberAppState(
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    navController: NavHostController = rememberAnimatedNavController(),
+    snackbarManager: SnackbarManager = SnackbarManager,
+    resources: Resources = resources(),
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
+) = remember(scaffoldState, navController, snackbarManager, resources, coroutineScope) {
+    BookyAppState(
+        scaffoldState = scaffoldState,
+        navController = navController,
+        snackbarManager = snackbarManager,
+        resources = resources,
+        coroutineScope = coroutineScope
+    )
+}
+
+@Composable
+@ReadOnlyComposable
+fun resources(): Resources {
+    LocalConfiguration.current
+    return LocalContext.current.resources
 }

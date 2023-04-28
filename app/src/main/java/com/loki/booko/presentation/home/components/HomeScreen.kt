@@ -13,26 +13,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
-import com.loki.booko.presentation.navigation.NavGraph
+import com.loki.booko.presentation.navigation.Screens
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
     searchTerm: String = ""
 ) {
 
-    val term by remember { mutableStateOf(searchTerm) }
-
     LaunchedEffect(key1 = true) {
-        if (term.isNotEmpty()) {
-            viewModel.searchBook(term)
+        if (searchTerm.isNotEmpty()) {
+            viewModel.searchBook(searchTerm)
         }
     }
 
@@ -110,7 +107,7 @@ fun BookSection(
                 bookDto = book,
                 modifier = Modifier.padding(horizontal = 16.dp,  vertical = 12.dp),
                 onItemClick = {
-                    navController.navigate(NavGraph.BookDetailScreen.navWithArgs(book.id))
+                    navController.navigate(Screens.BookDetailScreen.navWithArgs(book.id))
                 }
             )
         }

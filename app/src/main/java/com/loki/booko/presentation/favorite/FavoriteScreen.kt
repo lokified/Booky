@@ -1,5 +1,6 @@
 package com.loki.booko.presentation.favorite
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,17 +13,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.common.BookItem
-import com.loki.booko.presentation.navigation.NavGraph
+import com.loki.booko.presentation.navigation.Screens
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun FavoriteScreen(
     navController: NavController,
-    viewModel: FavoriteViewModel = hiltViewModel()
+    viewModel: FavoriteViewModel
 ) {
 
     Scaffold(
@@ -37,18 +38,18 @@ fun FavoriteScreen(
         }
     ) {
 
-        val state = viewModel.favoriteState.collectAsState()
+        val state by viewModel.favoriteState.collectAsState()
 
         Box(modifier = Modifier.fillMaxSize()) {
 
-            if (state.value.favoriteList.isNotEmpty()) {
+            if (state.favoriteList.isNotEmpty()) {
                 FavoritesSection(
-                    favBooks = state.value.favoriteList,
+                    favBooks = state.favoriteList,
                     navController = navController
                 )
             }
             else {
-                if (!state.value.isLoading) {
+                if (!state.isLoading) {
                     Text(
                         text = "You have no favorites",
                         color = MaterialTheme.colors.surface,
@@ -61,7 +62,7 @@ fun FavoriteScreen(
                 }
             }
 
-            if (state.value.isLoading) {
+            if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -93,7 +94,7 @@ fun FavoritesSection(
                 ),
                 bookDto = book,
                 onItemClick = {
-                    navController.navigate(NavGraph.BookDetailScreen.navWithArgs(book.id))
+                    navController.navigate(Screens.BookDetailScreen.navWithArgs(book.id))
                 }
             )
         }

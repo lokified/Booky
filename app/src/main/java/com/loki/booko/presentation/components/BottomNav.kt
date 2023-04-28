@@ -6,11 +6,10 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.loki.booko.presentation.navigation.NavGraph
+import com.loki.booko.presentation.navigation.Screens
 
 @Composable
 fun BottomNav(
@@ -66,16 +65,16 @@ val navItems = listOf(
     BottomNavItem(
         icon = Icons.Filled.Home,
         navTitle = "Home",
-        route = NavGraph.HomeScreen.route
+        route = Screens.HomeScreen.route
     ),
     BottomNavItem(
         icon = Icons.Filled.Favorite,
         navTitle = "Favorites",
-        route = NavGraph.FavoriteScreen.route
+        route = Screens.FavoriteScreen.route
     ),
     BottomNavItem(
         icon = Icons.Filled.Settings,
         navTitle = "Settings",
-        route = NavGraph.SettingsScreen.route
+        route = Screens.SettingsScreen.route
     )
 )

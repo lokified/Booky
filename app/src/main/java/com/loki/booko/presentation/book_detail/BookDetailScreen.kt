@@ -1,5 +1,6 @@
 package com.loki.booko.presentation.book_detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -18,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -26,15 +26,14 @@ import com.loki.booko.domain.models.BookDto
 import com.loki.booko.presentation.MainActivity
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.util.extensions.getActivity
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun BookDetailScreen(
     navController: NavController,
-    viewModel: BookDetailViewModel = hiltViewModel()
+    viewModel: BookDetailViewModel
 ) {
 
     val state = viewModel.bookDetailState.value

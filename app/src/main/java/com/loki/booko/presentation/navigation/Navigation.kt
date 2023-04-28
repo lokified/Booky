@@ -1,14 +1,20 @@
 package com.loki.booko.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
-import androidx.navigation.NavHostController
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.loki.booko.presentation.BookyAppState
 import com.loki.booko.presentation.book_detail.BookDetailScreen
+import com.loki.booko.presentation.book_detail.BookDetailViewModel
 import com.loki.booko.presentation.favorite.FavoriteScreen
+import com.loki.booko.presentation.favorite.FavoriteViewModel
+import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.home.components.HomeScreen
 import com.loki.booko.presentation.search.SearchScreen
 import com.loki.booko.presentation.settings.SettingsScreen
@@ -18,60 +24,135 @@ import com.loki.booko.util.Constants.BOOK_ID
 @ExperimentalAnimationApi
 @Composable
 fun Navigation(
-    navController: NavHostController
+    appState: BookyAppState
 ) {
+    
+    var term by remember { mutableStateOf("") }
 
-
-    NavHost(navController = navController, startDestination = NavGraph.HomeScreen.route ) {
-
-        var term = ""
+    AnimatedNavHost(
+        navController = appState.navController,
+        startDestination = Screens.HomeScreen.route,
+    ) {
 
         composable(
-            route = NavGraph.SearchScreen.route
+            route = Screens.SearchScreen.route,
+            enterTransition = {
+                if (initialState.destination.route == Screens.HomeScreen.route)
+                    slideIntoContainer(
+                        AnimatedContentScope.SlideDirection.Left,
+                        animationSpec = tween(800)
+                    ) else null
+            },
+            popExitTransition = {
+                if (targetState.destination.route == Screens.HomeScreen.route)
+                    slideOutOfContainer(
+                        AnimatedContentScope.SlideDirection.Right,
+                        animationSpec = tween(800)
+
+                    ) else null
+            }
         ) {
             SearchScreen(
-                navController = navController
+                navController = appState.navController
             ) {
                 term = it
             }
         }
 
-        composable(route = NavGraph.HomeScreen.route) {
-            HomeScreen(navController = navController, searchTerm = term)
-        }
+        composable(
+            route = Screens.HomeScreen.route,
+            enterTransition = {
+                if (initialState.destination.route == Screens.BookDetailScreen.route)
+                    slideIntoContainer(
+                        AnimatedContentScope.SlideDirection.Right,
+                        animationSpec = tween(800)
+                    )
+                else if (initialState.destination.route == Screens.SearchScreen.route)
+                slideIntoContainer(
+                    AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(800)
+                ) else null
+            },
+            popExitTransition = {
+                if (targetState.destination.route == Screens.BookDetailScreen.route)
+                    slideOutOfContainer(
+                        AnimatedContentScope.SlideDirection.Left,
+                        animationSpec = tween(800)
+                    )
 
-        composable(route = NavGraph.FavoriteScreen.route) {
-            FavoriteScreen(navController = navController)
-        }
-
-        composable(route = NavGraph.SettingsScreen.route) {
-            SettingsScreen(navController = navController)
+                else if (targetState.destination.route == Screens.SearchScreen.route)
+                    slideOutOfContainer(
+                        AnimatedContentScope.SlideDirection.Left,
+                        animationSpec = tween(800)
+                    ) else null
+            }
+        ) {
+            val homeViewModel = hiltViewModel<HomeViewModel>()
+            HomeScreen(
+                navController = appState.navController,
+                searchTerm = term,
+                viewModel = homeViewModel
+            )
         }
 
         composable(
-            route = NavGraph.BookDetailScreen.withBookId(),
+            route = Screens.FavoriteScreen.route
+        ) {
+
+            val favoriteViewModel = hiltViewModel<FavoriteViewModel>()
+            FavoriteScreen(
+                navController = appState.navController,
+                viewModel = favoriteViewModel
+            )
+        }
+
+        composable(
+            route = Screens.SettingsScreen.route
+        ) {
+            SettingsScreen(navController = appState.navController)
+        }
+
+        composable(
+            route = Screens.BookDetailScreen.withBookId(),
             arguments = listOf(
                 navArgument(name = BOOK_ID) {
                     type = NavType.IntType
                 }
-            )
+            ),
+            enterTransition = {
+                if (initialState.destination.route == Screens.HomeScreen.route)
+                    slideIntoContainer(
+                        AnimatedContentScope.SlideDirection.Left,
+                        animationSpec = tween(800)
+                    ) else null
+            },
+            exitTransition = {
+                if (targetState.destination.route == Screens.HomeScreen.route)
+                    slideOutOfContainer(
+                        AnimatedContentScope.SlideDirection.Right,
+                        animationSpec = tween(800)
+                    ) else null
+            }
         ) {
 
-            BookDetailScreen(navController = navController)
-
+            val bookDetailViewModel = hiltViewModel<BookDetailViewModel>()
+            BookDetailScreen(
+                navController = appState.navController,
+                viewModel = bookDetailViewModel
+            )
         }
 
     }
 }
 
 
-sealed class NavGraph(val route: String) {
+sealed class Screens(val route: String) {
 
-    object HomeScreen: NavGraph("Home_screen")
-    object FavoriteScreen: NavGraph("Favorite_screen")
-    object SettingsScreen: NavGraph("Settings_screen")
-    object SearchScreen: NavGraph("Search_screen")
-    object BookDetailScreen: NavGraph("Book_detail_screen")
+    object HomeScreen: Screens("Home_screen")
+    object FavoriteScreen: Screens("Favorite_screen")
+    object SettingsScreen: Screens("Settings_screen")
+    object SearchScreen: Screens("Search_screen")
+    object BookDetailScreen: Screens("Book_detail_screen")
 
     fun withBookId(): String {
         return "${BookDetailScreen.route}/{$BOOK_ID}"
