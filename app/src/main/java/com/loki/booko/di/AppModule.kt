@@ -3,9 +3,9 @@ package com.loki.booko.di
 import android.app.Application
 import androidx.room.Room
 import com.loki.booko.data.local.BookDatabase
-import com.loki.booko.data.repository.local.BookRepositoryImpl
+import com.loki.booko.data.repository.local.FavoriteBookRepositoryImpl
 import com.loki.booko.data.repository.local.SearchTermRepositoryImpl
-import com.loki.booko.domain.repository.local.BookRepository
+import com.loki.booko.domain.repository.local.FavoriteBookRepository
 import com.loki.booko.domain.repository.local.SearchTermRepository
 import dagger.Module
 import dagger.Provides
@@ -30,8 +30,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBookRepository(bookDatabase: BookDatabase): BookRepository {
-        return BookRepositoryImpl(bookDatabase.bookDao)
+    fun provideBookRepository(bookDatabase: BookDatabase): FavoriteBookRepository {
+        return FavoriteBookRepositoryImpl(bookDatabase.favoriteDao)
     }
 
     @Provides

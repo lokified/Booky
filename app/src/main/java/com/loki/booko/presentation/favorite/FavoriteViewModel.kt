@@ -2,7 +2,8 @@ package com.loki.booko.presentation.favorite
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.loki.booko.domain.repository.local.BookRepository
+import com.loki.booko.data.local.mappers.toBookItem
+import com.loki.booko.domain.repository.local.FavoriteBookRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavoriteViewModel @Inject constructor(
-    private val bookRepository: BookRepository
+    private val favoriteBookRepository: FavoriteBookRepository
 ): ViewModel(){
 
     private val _favoriteState = MutableStateFlow(FavoriteState())
@@ -33,9 +34,9 @@ class FavoriteViewModel @Inject constructor(
 
             delay(1000L)
 
-            bookRepository.getAllBooks().collectLatest {
+            favoriteBookRepository.getAllBooks().collectLatest {
                 _favoriteState.value = FavoriteState(
-                    favoriteList = it
+                    favoriteList = it.map { it.toBookItem() }
                 )
             }
         }
@@ -43,7 +44,7 @@ class FavoriteViewModel @Inject constructor(
 
     fun deleteAll() {
         viewModelScope.launch {
-            bookRepository.deleteAll()
+            favoriteBookRepository.deleteAll()
         }
     }
 }

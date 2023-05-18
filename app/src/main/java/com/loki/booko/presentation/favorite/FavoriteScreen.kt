@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.loki.booko.domain.models.BookDto
+import com.loki.booko.domain.models.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.navigation.Screens
@@ -75,7 +75,7 @@ fun FavoriteScreen(
 @Composable
 fun FavoritesSection(
     modifier: Modifier = Modifier,
-    favBooks: List<BookDto>,
+    favBooks: List<BookItem>,
     navController: NavController
 ) {
     
@@ -92,7 +92,7 @@ fun FavoritesSection(
                     horizontal = 16.dp,
                     vertical = 12.dp
                 ),
-                bookDto = book,
+                book = book,
                 onItemClick = {
                     navController.navigate(Screens.BookDetailScreen.navWithArgs(book.id))
                 }

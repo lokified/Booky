@@ -1,11 +1,12 @@
 package com.loki.booko.util
 
-import com.loki.booko.domain.models.BookDto
+import com.loki.booko.data.remote.response.BookDto
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import java.io.IOException
 
-fun bookListResponse(data: List<BookDto>) = flow<Resource<List<BookDto>>> {
+ fun bookListResponse(data: List<BookDto>) = flow<Resource<List<BookDto>>> {
 
     try {
         emit(Resource.Loading(data = null))

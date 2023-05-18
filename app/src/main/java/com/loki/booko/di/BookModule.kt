@@ -1,15 +1,17 @@
 package com.loki.booko.di
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import com.loki.booko.data.local.BookDatabase
 import com.loki.booko.data.remote.BookApi
-import com.loki.booko.data.remote.GoogleBooksApi
+import com.loki.booko.data.remote.BooksMediator
 import com.loki.booko.data.repository.remote.BooksRepositoryImpl
-import com.loki.booko.data.repository.remote.GoogleBookRepositoryImpl
+import com.loki.booko.domain.models.BookEntity
 import com.loki.booko.domain.repository.remote.BooksRepository
-import com.loki.booko.domain.repository.remote.GoogleBookRepository
 import com.loki.booko.domain.use_cases.books.BookDetailUseCase
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.util.Constants.BOOK_BASE_URL
-import com.loki.booko.util.Constants.GOOGLE_BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,23 +37,6 @@ object BookModule {
 
     @Singleton
     @Provides
-    fun provideGoogleBooksApi(): GoogleBooksApi {
-
-        return Retrofit.Builder()
-            .baseUrl(GOOGLE_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(GoogleBooksApi::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideGoogleBookRepository(api: GoogleBooksApi): GoogleBookRepository {
-        return GoogleBookRepositoryImpl(api)
-    }
-
-    @Singleton
-    @Provides
     fun provideBookRepository(api: BookApi): BooksRepository {
         return BooksRepositoryImpl(api)
     }
@@ -61,6 +46,24 @@ object BookModule {
     fun provideBookUseCase(repository: BooksRepository): BookUseCase {
         return BookUseCase(
             getBookDetail = BookDetailUseCase(repository)
+        )
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    @Singleton
+    @Provides
+    fun provideBookMediator(api: BookApi, db: BookDatabase): Pager<Int, BookEntity> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 32
+            ),
+            remoteMediator = BooksMediator(
+                api = api,
+                db = db
+            ),
+            pagingSourceFactory = {
+                db.cachedBooksDao.pagingSource()
+            }
         )
     }
 }

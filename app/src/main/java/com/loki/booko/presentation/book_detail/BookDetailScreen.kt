@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.loki.booko.domain.models.BookDto
+import com.loki.booko.domain.models.Favorite
 import com.loki.booko.presentation.MainActivity
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.util.extensions.getActivity
@@ -79,12 +79,12 @@ fun BookDetailScreen(
         },
         bottomBar = {
 
-            state.book?.let {
+            state.favorite?.let {
                 BottomSection(
-                    bookDto = it,
+                    favorite = it,
                     onDownloadClick = {
                         val message = viewModel.downloadBook(
-                            book = it,
+                            favorite = it,
                             activity = (context.getActivity() as MainActivity)
                         )
 
@@ -116,10 +116,10 @@ fun BookDetailScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
 
-                    state.book?.let { book ->
+                    state.favorite?.let { book ->
                         TopSection(
                             modifier = Modifier.padding(16.dp),
-                            bookDto = book
+                            favorite = book
                         )
                     }
 
@@ -142,7 +142,7 @@ fun BookDetailScreen(
 
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
 
-                        viewModel.getBookIsRead(state.book!!)
+                        viewModel.getBookIsRead(state.favorite!!)
 
                         val isRead = viewModel.isRead.value
 
@@ -151,7 +151,7 @@ fun BookDetailScreen(
                         TextButton(
                             onClick = {
                                 if (!isRead) {
-                                    viewModel.saveAsFavorite(state.book)
+                                    viewModel.saveAsFavorite(state.favorite)
                                 }
                             }
                         ) {
@@ -187,7 +187,7 @@ fun BookDetailScreen(
 @Composable
 fun TopSection(
     modifier: Modifier = Modifier,
-    bookDto: BookDto
+    favorite: Favorite
 ) {
 
     Box(modifier = modifier) {
@@ -198,7 +198,7 @@ fun TopSection(
 
 
             val painter = rememberImagePainter(
-                data = bookDto.formats.imagejpeg
+                data = favorite.formats.imagejpeg
             )
 
             Image(
@@ -218,7 +218,7 @@ fun TopSection(
             ) {
 
                 Text(
-                    text = bookDto.title,
+                    text = favorite.title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     color = MaterialTheme.colors.surface,
@@ -227,7 +227,7 @@ fun TopSection(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                val authors = bookDto.author?.map { it.name }?.joinToString(separator = ",")
+                val authors = favorite.author?.map { it.name }?.joinToString(separator = ",")
                 Text(
                     text = "Author(s) | $authors",
                     fontSize = 15.sp,
@@ -235,7 +235,7 @@ fun TopSection(
                     maxLines = 2
                 )
 
-                val languages = bookDto.languages.joinToString(separator = ",")
+                val languages = favorite.languages.joinToString(separator = ",")
 
                 Text(
                     text = "Language(s) | $languages",
@@ -250,7 +250,7 @@ fun TopSection(
 @Composable
 fun BottomSection(
     modifier: Modifier = Modifier,
-    bookDto: BookDto,
+    favorite: Favorite,
     onDownloadClick: () -> Unit
 ) {
 
@@ -267,7 +267,7 @@ fun BottomSection(
         ) {
 
             Text(
-                text = "${bookDto.download_count} Downloads",
+                text = "${favorite.download_count} Downloads",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colors.onSurface

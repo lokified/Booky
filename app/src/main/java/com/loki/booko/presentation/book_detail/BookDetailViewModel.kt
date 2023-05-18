@@ -3,18 +3,15 @@ package com.loki.booko.presentation.book_detail
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
-import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.loki.booko.domain.models.BookDto
-import com.loki.booko.domain.repository.local.BookRepository
+import com.loki.booko.domain.models.Favorite
+import com.loki.booko.domain.repository.local.FavoriteBookRepository
 import com.loki.booko.domain.repository.remote.GoogleBookRepository
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.presentation.MainActivity
@@ -33,7 +30,7 @@ class BookDetailViewModel @Inject constructor(
     private val bookUseCase: BookUseCase,
     savedStateHandle: SavedStateHandle,
     private val googleBookRepository: GoogleBookRepository,
-    private val bookRepository: BookRepository
+    private val favoriteBookRepository: FavoriteBookRepository
 ): ViewModel() {
 
     private val _bookDetailState = mutableStateOf(BookDetailState())
@@ -72,7 +69,7 @@ class BookDetailViewModel @Inject constructor(
                         )
                     }
                     _bookDetailState.value = BookDetailState(
-                        book = result.data,
+                        favorite = result.data,
                         bookSynopsis = bookInfoList?.get(0)?.volumeInfo?.description
                     )
 
@@ -87,10 +84,10 @@ class BookDetailViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    fun saveAsFavorite(bookDto: BookDto) {
+    fun saveAsFavorite(favorite: Favorite) {
 
-        bookDto.apply {
-            val book = BookDto(
+        favorite.apply {
+            val favFavorite = Favorite(
                 author = author,
                 bookshelves = bookshelves,
                 copyright = copyright,
@@ -109,7 +106,7 @@ class BookDetailViewModel @Inject constructor(
                 _favoriteBook.value = FavoriteBookState(
                     isLoading = true
                 )
-                bookRepository.saveBook(book)
+                favoriteBookRepository.saveBook(favFavorite)
                 _favoriteBook.value = FavoriteBookState(
                     message = "Book added to favorites"
                 )
@@ -117,11 +114,11 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun getBookIsRead(bookDto: BookDto) {
+    fun getBookIsRead(favorite: Favorite) {
         viewModelScope.launch {
-            bookRepository.getAllBooks().collectLatest { books ->
+            favoriteBookRepository.getAllBooks().collectLatest { books ->
                 for (i in books.indices) {
-                    if (books[i].id == bookDto.id) {
+                    if (books[i].id == favorite.id) {
                         isRead.value  = true
                     }
                 }
@@ -130,19 +127,19 @@ class BookDetailViewModel @Inject constructor(
     }
     
     @SuppressLint("Range")
-    fun downloadBook(book: BookDto, activity: MainActivity): String {
+    fun downloadBook(favorite: Favorite, activity: MainActivity): String {
 
         if (activity.checkStoragePermission()) {
-            val filename = book.title.split(" ").joinToString(separator = "+") + ".epub"
+            val filename = favorite.title.split(" ").joinToString(separator = "+") + ".epub"
             val manager = activity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val uri = Uri.parse(book.formats.applicationepubzip)
+            val uri = Uri.parse(favorite.formats.applicationepubzip)
             val request = DownloadManager.Request(uri)
 
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setAllowedOverRoaming(true)
                 .setAllowedOverMetered(true)
-                .setTitle(book.title)
-                .setDescription(book.title + book.bookshelves.joinToString(separator = ","))
+                .setTitle(favorite.title)
+                .setDescription(favorite.title + favorite.bookshelves.joinToString(separator = ","))
                 .setDestinationInExternalPublicDir(
                     Environment.DIRECTORY_DOWNLOADS,
                     DOWNLOAD_DIR + "/" + filename
@@ -162,7 +159,7 @@ class BookDetailViewModel @Inject constructor(
 
                         when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
                             DownloadManager.STATUS_SUCCESSFUL -> {
-                                insertIntoDB(book)
+                                insertIntoDB(favorite)
                                 isDownloadFinished = true
                             }
                             DownloadManager.STATUS_PAUSED, DownloadManager.STATUS_PENDING -> {}
@@ -186,7 +183,7 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    private fun insertIntoDB(book: BookDto) {
-        saveAsFavorite(bookDto = book)
+    private fun insertIntoDB(favorite: Favorite) {
+        saveAsFavorite(favorite = favorite)
     }
 }

@@ -20,14 +20,14 @@ import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.google.accompanist.flowlayout.FlowRow
-import com.loki.booko.domain.models.BookDto
+import com.loki.booko.domain.models.BookItem
 
 
 @Composable
 fun BookItem(
     modifier: Modifier = Modifier,
-    bookDto: BookDto,
-    onItemClick: (BookDto) -> Unit
+    book: BookItem,
+    onItemClick: (BookItem) -> Unit
 ) {
 
     Box(
@@ -36,7 +36,7 @@ fun BookItem(
             .height(200.dp)
             .shadow(elevation = 1.dp)
             .clip(RoundedCornerShape(5.dp))
-            .clickable { onItemClick(bookDto) }
+            .clickable { onItemClick(book) }
     ) {
 
         Row(
@@ -45,7 +45,7 @@ fun BookItem(
         ) {
 
             BookImage(
-                bookUrl = bookDto.formats.imagejpeg!!,
+                bookUrl = book.formats.imagejpeg!!,
                 modifier = Modifier.size(
                     height = 200.dp,
                     width = 150.dp
@@ -57,7 +57,7 @@ fun BookItem(
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
 
                 Text(
-                    text = bookDto.title,
+                    text = book.title,
                     fontSize = 20.sp,
                     color = Color.Black,
                     style = MaterialTheme.typography.body1,
@@ -72,7 +72,7 @@ fun BookItem(
                     crossAxisSpacing = 10.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val subjects = firstFour(bookDto.subjects)
+                    val subjects = firstFour(book.subjects)
 
                     subjects.forEach { subject ->
                         

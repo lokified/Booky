@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.loki.booko.presentation.BookyAppState
@@ -88,10 +89,12 @@ fun Navigation(
             }
         ) {
             val homeViewModel = hiltViewModel<HomeViewModel>()
+            val books = homeViewModel.bookPagingFlow.collectAsLazyPagingItems()
             HomeScreen(
                 navController = appState.navController,
                 searchTerm = term,
-                viewModel = homeViewModel
+                viewModel = homeViewModel,
+                books = books
             )
         }
 

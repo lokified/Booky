@@ -1,7 +1,7 @@
 package com.loki.booko.domain.use_cases.books
 
-import com.loki.booko.data.remote.response.toBookDto
-import com.loki.booko.domain.models.BookDto
+import com.loki.booko.data.local.mappers.toFavoriteBook
+import com.loki.booko.domain.models.Favorite
 import com.loki.booko.domain.repository.remote.BooksRepository
 import com.loki.booko.util.Resource
 import kotlinx.coroutines.flow.flow
@@ -12,16 +12,16 @@ class BookDetailUseCase(
     private val repository: BooksRepository
 ) {
 
-    operator fun invoke(bookId: Int) = flow<Resource<BookDto>> {
+    operator fun invoke(bookId: Int) = flow<Resource<Favorite>> {
         try {
-            emit(Resource.Loading<BookDto>(data = null))
-            emit(Resource.Success<BookDto>(data = repository.getBookDetail(bookId).toBookDto()))
+            emit(Resource.Loading<Favorite>(data = null))
+            emit(Resource.Success<Favorite>(data = repository.getBookDetail(bookId).toFavoriteBook()))
         }
         catch (e: HttpException) {
-            emit(Resource.Error<BookDto>(e.localizedMessage ?: "An unexpected error occurred", data = null))
+            emit(Resource.Error<Favorite>(e.localizedMessage ?: "An unexpected error occurred", data = null))
         }
         catch (e: IOException) {
-            emit(Resource.Error<BookDto>("check your internet connection", data = null))
+            emit(Resource.Error<Favorite>("check your internet connection", data = null))
         }
     }
 }

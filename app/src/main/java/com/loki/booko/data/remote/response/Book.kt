@@ -1,8 +1,6 @@
 package com.loki.booko.data.remote.response
 
-import com.loki.booko.domain.models.BookDto
-
-data class Book(
+data class BookDto(
     val id: Int,
     val title: String,
     val authors: List<Author>,
@@ -15,20 +13,3 @@ data class Book(
     val formats: Formats,
     val download_count: Int
 )
-
-fun Book.toBookDto(): BookDto {
-
-    return BookDto(
-        author = authors,
-        bookshelves = bookshelves,
-        copyright = copyright,
-        download_count = download_count,
-        formats = formats,
-        id = id,
-        languages = languages,
-        media_type = media_type,
-        subjects = subjects,
-        title = title,
-        translator = translators
-    )
-}
