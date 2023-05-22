@@ -46,7 +46,7 @@ fun BookDetailScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = state.isLoading) {
 
         viewModel.favoriteBook.collectLatest { state ->
 

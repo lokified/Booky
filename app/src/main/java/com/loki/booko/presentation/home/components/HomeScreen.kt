@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,24 +17,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import com.loki.booko.domain.models.BookItem
+import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.Screens
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel,
     books: LazyPagingItems<BookItem>,
+    snackbarHostState: SnackbarHostState = SnackbarHostState(),
     searchTerm: String = ""
 ) {
     val context = LocalContext.current
+    val networkStatus = viewModel.networkStatus.collectAsStateWithLifecycle()
+
+    if (networkStatus.value == NetworkStatus.Disconnected) {
+        LaunchedEffect(key1 =networkStatus) {
+            snackbarHostState.showSnackbar("You are offline")
+        }
+    }
 
     LaunchedEffect(key1 = books.loadState) {
 
@@ -55,6 +68,9 @@ fun HomeScreen(
                 title = "All Books",
                 navController = navController
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) { padding ->
 
@@ -84,7 +100,22 @@ fun HomeScreen(
                                 book = it,
                                 modifier = Modifier.padding(horizontal = 16.dp,  vertical = 12.dp),
                                 onItemClick = {
-                                    navController.navigate(Screens.BookDetailScreen.navWithArgs(book.id))
+                                    if (networkStatus.value == NetworkStatus.Disconnected) {
+                                        Toast.makeText(
+                                            context,
+                                            "You are offline",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+
+                                    if (networkStatus.value == NetworkStatus.Connected) {
+                                        navController.navigate(
+                                            Screens.BookDetailScreen.navWithArgs(
+                                                book.id
+                                            )
+                                        )
+                                    }
+
                                 }
                             )
                         }

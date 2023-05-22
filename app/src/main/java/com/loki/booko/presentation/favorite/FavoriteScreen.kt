@@ -1,6 +1,8 @@
 package com.loki.booko.presentation.favorite
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,10 +13,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.loki.booko.domain.models.BookItem
+import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.navigation.Screens
@@ -23,8 +28,18 @@ import com.loki.booko.presentation.navigation.Screens
 @Composable
 fun FavoriteScreen(
     navController: NavController,
-    viewModel: FavoriteViewModel
+    viewModel: FavoriteViewModel,
+    snackbarHostState: SnackbarHostState = SnackbarHostState()
 ) {
+
+    val context = LocalContext.current
+    val networkStatus = viewModel.networkStatus.collectAsStateWithLifecycle()
+
+    if (networkStatus.value == NetworkStatus.Disconnected) {
+        LaunchedEffect(key1 =networkStatus) {
+            snackbarHostState.showSnackbar("You are offline")
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -35,6 +50,9 @@ fun FavoriteScreen(
                     viewModel.deleteAll()
                 }
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         }
     ) {
 
@@ -45,7 +63,9 @@ fun FavoriteScreen(
             if (state.favoriteList.isNotEmpty()) {
                 FavoritesSection(
                     favBooks = state.favoriteList,
-                    navController = navController
+                    navController = navController,
+                    context = context,
+                    networkStatus = networkStatus.value
                 )
             }
             else {
@@ -76,7 +96,9 @@ fun FavoriteScreen(
 fun FavoritesSection(
     modifier: Modifier = Modifier,
     favBooks: List<BookItem>,
-    navController: NavController
+    navController: NavController,
+    context: Context,
+    networkStatus: NetworkStatus
 ) {
     
     LazyColumn(
@@ -94,7 +116,20 @@ fun FavoritesSection(
                 ),
                 book = book,
                 onItemClick = {
-                    navController.navigate(Screens.BookDetailScreen.navWithArgs(book.id))
+                    if (networkStatus == NetworkStatus.Disconnected) {
+                        Toast.makeText(
+                            context,
+                            "You are offline",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    if (networkStatus == NetworkStatus.Connected) {
+                        navController.navigate(
+                            Screens.BookDetailScreen.navWithArgs(
+                                book.id
+                            )
+                        )
+                    }
                 }
             )
         }
