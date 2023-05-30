@@ -22,6 +22,23 @@ fun BookDto.toBookEntity():  BookEntity {
     )
 }
 
+fun BookDto.toBookItem(): BookItem {
+
+    return BookItem(
+        author = authors,
+        bookshelves = bookshelves,
+        copyright = copyright,
+        download_count = download_count,
+        formats = formats,
+        id = id,
+        languages = languages,
+        media_type = media_type,
+        subjects = subjects,
+        title = title,
+        translator = translators
+    )
+}
+
 fun BookEntity.toBookItem(): BookItem {
 
     return BookItem(

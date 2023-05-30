@@ -29,21 +29,17 @@ import com.loki.booko.presentation.theme.BookoTheme
 import com.loki.booko.util.SnackbarManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: HomeViewModel by viewModels()
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        installSplashScreen().apply {
-            setKeepOnScreenCondition {
-                viewModel.bookState.value.isLoading
-            }
-        }
+        installSplashScreen()
 
         setContent {
             BookoTheme {

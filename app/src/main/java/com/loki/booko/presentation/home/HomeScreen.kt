@@ -28,15 +28,13 @@ import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.Screens
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel,
     books: LazyPagingItems<BookItem>,
-    snackbarHostState: SnackbarHostState = SnackbarHostState(),
-    searchTerm: String = ""
+    snackbarHostState: SnackbarHostState = SnackbarHostState()
 ) {
     val context = LocalContext.current
     val networkStatus = viewModel.networkStatus.collectAsStateWithLifecycle()
@@ -55,10 +53,6 @@ fun HomeScreen(
                 "Error: " + (books.loadState.refresh as LoadState.Error).error.message,
                 Toast.LENGTH_LONG
             ).show()
-        }
-
-        if (searchTerm.isNotEmpty()) {
-            viewModel.searchBook(searchTerm)
         }
     }
 

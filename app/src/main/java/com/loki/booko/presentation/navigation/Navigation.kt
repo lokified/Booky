@@ -18,6 +18,7 @@ import com.loki.booko.presentation.favorite.FavoriteViewModel
 import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.home.components.HomeScreen
 import com.loki.booko.presentation.search.SearchScreen
+import com.loki.booko.presentation.search.SearchViewModel
 import com.loki.booko.presentation.settings.SettingsScreen
 import com.loki.booko.util.Constants.BOOK_ID
 
@@ -27,8 +28,6 @@ import com.loki.booko.util.Constants.BOOK_ID
 fun Navigation(
     appState: BookyAppState
 ) {
-    
-    var term by remember { mutableStateOf("") }
 
     AnimatedNavHost(
         navController = appState.navController,
@@ -53,11 +52,11 @@ fun Navigation(
                     ) else null
             }
         ) {
+            val viewModel = hiltViewModel<SearchViewModel>()
             SearchScreen(
-                navController = appState.navController
-            ) {
-                term = it
-            }
+                viewModel = viewModel,
+                openScreen = { appState.navigate(it) }
+            )
         }
 
         composable(
@@ -92,7 +91,6 @@ fun Navigation(
             val books = homeViewModel.bookPagingFlow.collectAsLazyPagingItems()
             HomeScreen(
                 navController = appState.navController,
-                searchTerm = term,
                 viewModel = homeViewModel,
                 books = books
             )

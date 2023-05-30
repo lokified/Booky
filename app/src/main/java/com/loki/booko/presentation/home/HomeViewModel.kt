@@ -41,34 +41,4 @@ class HomeViewModel @Inject constructor(
             pagingData.map { it.toBookItem() }
         }.cachedIn(viewModelScope)
 
-    private val _bookState = MutableStateFlow(HomeState())
-    val bookState = _bookState.asStateFlow()
-
-
-    suspend fun searchBook(term: String) {
-
-        booksRepository.searchBook(term).onEach { result ->
-
-            when (result) {
-
-                is Resource.Loading -> {
-                    _bookState.value = HomeState(
-                        isLoading = true
-                    )
-                }
-
-                is Resource.Success -> {
-                    _bookState.value = HomeState(
-                        bookList = result.data ?: emptyList()
-                    )
-                }
-
-                is Resource.Error -> {
-                    _bookState.value = HomeState(
-                        errorMessage = result.message ?: "Something went wrong"
-                    )
-                }
-            }
-        }.launchIn(viewModelScope)
-    }
 }

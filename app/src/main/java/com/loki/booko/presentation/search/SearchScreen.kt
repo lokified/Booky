@@ -1,8 +1,10 @@
 package com.loki.booko.presentation.search
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -14,38 +16,48 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.flowlayout.FlowRow
+import com.loki.booko.domain.models.BookItem
 import com.loki.booko.domain.models.Term
+import com.loki.booko.presentation.common.BookItem
+import com.loki.booko.presentation.navigation.Screens
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchScreen(
-    navController: NavController,
-    viewModel: SearchViewModel = hiltViewModel(),
-    onTermSearched: (String) -> Unit
+    viewModel: SearchViewModel,
+    openScreen: (String) -> Unit
 ) {
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    var term by remember { viewModel.searchTerm }
+    var isSearching by remember { viewModel.isSearching }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val state by viewModel.searchState.collectAsStateWithLifecycle()
 
-        var term by remember { mutableStateOf("") }
-        val keyboardController = LocalSoftwareKeyboardController.current
+    Column {
 
         SearchTextFieldSection(
             onClick = {
                 if (term.isNotEmpty()) {
-                    navController.popBackStack()
-                    onTermSearched(term.trim())
                     viewModel.saveSearchTerm(term.trim())
+                    viewModel.searchBook(term.trim())
+                    isSearching = true
                     keyboardController?.hide()
                 }
             },
-            onTermChange = { term = it },
+            onTermChange = {
+                term = it
+
+                if (it.isEmpty()) {
+                    isSearching = false
+                    viewModel.initializeScreen()
+                } },
             modifier = Modifier.padding(top = 16.dp),
             term = term
         )
@@ -53,23 +65,64 @@ fun SearchScreen(
         Spacer(modifier = Modifier.height(50.dp))
 
         Text(
-            text = "Search History",
+            text = if(!isSearching) "Search History" else "Search Results",
             modifier = Modifier.padding(start = 16.dp),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
 
-        TermsSection(
+        AnimatedVisibility(
+            visible = !isSearching,
+        ) {
 
-            modifier = Modifier.padding(16.dp),
-            terms = viewModel.searchTermState.value.searchTermList,
-            onItemClick = {
-                          term = it
-            },
-            onCancelClick = {
-                viewModel.deleteSearchTerm(it)
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TermsSection(
+
+                    modifier = Modifier.padding(16.dp),
+                    terms = state.searchTermList,
+                    onItemClick = {
+                        term = it
+                    },
+                    onCancelClick = {
+                        viewModel.deleteSearchTerm(it)
+                    }
+                )
             }
-        )
+        }
+
+        AnimatedVisibility(
+            visible = isSearching
+        ) {
+
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                if (viewModel.isLoading.value) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                if (state.bookList.isNotEmpty()) {
+
+                    SearchedSection(
+                        modifier = Modifier.fillMaxSize(),
+                        books = state.bookList,
+                        onItemClick = { openScreen(Screens.BookDetailScreen.navWithArgs(it.id)) }
+                    )
+                }
+
+                if (state.errorMessage.isNotBlank()) {
+                    Text(
+                        text = state.errorMessage,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -150,6 +203,7 @@ fun TermsSection(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Term(
     modifier: Modifier = Modifier,
@@ -157,32 +211,24 @@ fun Term(
     onItemClick: (String) -> Unit,
     onCancelClick: (Term) -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .clickable { onItemClick(term.searchTerm) },
-        contentAlignment = Alignment.Center
-    ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 4.dp)
-        ) {
+    val isSelected by remember { mutableStateOf(true) }
+    val selectedBgColor = Color.Transparent
+    val selectedTextColor = MaterialTheme.colors.secondary
 
-            Text(
-                text = term.searchTerm,
-                color = MaterialTheme.colors.secondary,
-                maxLines = 1,
-                fontSize = 18.sp
-            )
-            
-            Spacer(modifier = Modifier.width(2.dp))
-
+    FilterChip(
+        selected = isSelected,
+        onClick = { onItemClick(term.searchTerm) },
+        modifier = modifier,
+        colors = ChipDefaults.outlinedFilterChipColors(
+            backgroundColor = selectedBgColor,
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = selectedTextColor
+        ),
+        shape = RoundedCornerShape(4.dp),
+        trailingIcon = {
             IconButton(
                 onClick = { onCancelClick(term) }
             ) {
@@ -190,10 +236,39 @@ fun Term(
                 Icon(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = "Cancel",
-                    tint = MaterialTheme.colors.secondary,
+                    tint = selectedTextColor,
                     modifier = Modifier.size(20.dp)
                 )
             }
+        }
+    ) {
+        Text(
+            text = term.searchTerm,
+            color = selectedTextColor,
+            maxLines = 1,
+            fontSize = 18.sp
+        )
+    }
+}
+
+@Composable
+fun SearchedSection(
+    modifier: Modifier = Modifier,
+    books: List<BookItem>,
+    onItemClick: (BookItem) -> Unit
+) {
+
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp)
+    ) {
+
+        items(books) { book ->
+            BookItem(
+                modifier = Modifier.padding(8.dp),
+                book = book,
+                onItemClick = { onItemClick(book) }
+            )
         }
     }
 }
