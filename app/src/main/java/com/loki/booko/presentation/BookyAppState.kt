@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
+import com.loki.booko.presentation.navigation.Screens
 import com.loki.booko.util.Resource
 import com.loki.booko.util.SnackbarManager
 import com.loki.booko.util.SnackbarMessage.Companion.toMessage
@@ -37,6 +38,16 @@ class BookyAppState(
     fun navigate(route: String) {
         navController.navigate(route = route) {
             launchSingleTop = true
+        }
+    }
+
+    fun bottomNavNavigate(route: String) {
+        navController.navigate(route = route) {
+            launchSingleTop = true
+            popUpTo(Screens.HomeScreen.route) {
+                saveState = true
+            }
+            restoreState = true
         }
     }
 

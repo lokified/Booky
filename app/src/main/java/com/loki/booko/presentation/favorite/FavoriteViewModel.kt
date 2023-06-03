@@ -44,8 +44,6 @@ class FavoriteViewModel @Inject constructor(
                 isLoading = true
             )
 
-            delay(1000L)
-
             favoriteBookRepository.getAllBooks().collectLatest {
                 _favoriteState.value = FavoriteState(
                     favoriteList = it.map { it.toBookItem() }

@@ -20,6 +20,7 @@ import com.loki.booko.presentation.home.components.HomeScreen
 import com.loki.booko.presentation.search.SearchScreen
 import com.loki.booko.presentation.search.SearchViewModel
 import com.loki.booko.presentation.settings.SettingsScreen
+import com.loki.booko.presentation.settings.SettingsViewModel
 import com.loki.booko.util.Constants.BOOK_ID
 
 
@@ -110,7 +111,11 @@ fun Navigation(
         composable(
             route = Screens.SettingsScreen.route
         ) {
-            SettingsScreen(navController = appState.navController)
+            val viewModel = hiltViewModel<SettingsViewModel>()
+            SettingsScreen(
+                navController = appState.navController,
+                viewModel = viewModel
+            )
         }
 
         composable(

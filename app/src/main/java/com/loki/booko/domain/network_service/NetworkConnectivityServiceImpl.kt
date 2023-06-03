@@ -18,7 +18,7 @@ class NetworkConnectivityServiceImpl @Inject constructor (
     private val context: Context
         ): NetworkConnectivityService {
 
-    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    override val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     override val networkStatus: Flow<NetworkStatus> = callbackFlow<NetworkStatus> {
 

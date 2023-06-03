@@ -50,7 +50,9 @@ class MainActivity : AppCompatActivity() {
                     bottomBar = {
                         BottomNav(
                             navController = appState.navController,
-                            onItemClick = { appState.navigate(it.route) }
+                            onItemClick = {
+                                appState.bottomNavNavigate(it.route)
+                            }
                         )
                     }
                 ) { padding ->

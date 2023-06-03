@@ -3,21 +3,28 @@ package com.loki.booko.presentation.book_detail
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.Environment
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.loki.booko.data.local.datastore.DataStoreStorage
 import com.loki.booko.domain.models.Favorite
+import com.loki.booko.domain.network_service.NetworkConnectivityService
+import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.domain.repository.local.FavoriteBookRepository
 import com.loki.booko.domain.repository.remote.GoogleBookRepository
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.presentation.MainActivity
 import com.loki.booko.util.Constants.BOOK_ID
-import com.loki.booko.util.Constants.DOWNLOAD_DIR
+import com.loki.booko.util.DownloadMedium
 import com.loki.booko.util.Resource
+import com.loki.booko.util.defaultDirectory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,7 +37,9 @@ class BookDetailViewModel @Inject constructor(
     private val bookUseCase: BookUseCase,
     savedStateHandle: SavedStateHandle,
     private val googleBookRepository: GoogleBookRepository,
-    private val favoriteBookRepository: FavoriteBookRepository
+    private val favoriteBookRepository: FavoriteBookRepository,
+    private val dataStore: DataStoreStorage,
+    private val networkConnectivityService: NetworkConnectivityService,
 ): ViewModel() {
 
     private val _bookDetailState = mutableStateOf(BookDetailState())
@@ -41,10 +50,22 @@ class BookDetailViewModel @Inject constructor(
 
     val isRead = mutableStateOf(false)
 
+    val networkStatus: StateFlow<NetworkStatus> = networkConnectivityService.networkStatus.stateIn(
+        initialValue = NetworkStatus.Unknown,
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000)
+    )
+
+    private val downloadLocation = mutableStateOf("")
+    private val downloadMedium = mutableStateOf("")
+    val downloadMessage = mutableStateOf("")
+
     init {
         savedStateHandle.get<Int>(BOOK_ID)?.let { bookId ->
             getBookDetail(bookId)
         }
+        getDownloadLocation()
+        getDownloadMedium()
     }
 
     private fun getBookDetail(bookId: Int) {
@@ -60,7 +81,6 @@ class BookDetailViewModel @Inject constructor(
                 }
 
                 is Resource.Success -> {
-                    delay(1000L)
                     val bookInfoList = googleBookRepository.getBookInfo(result.data?.title!!)
 
                     if(bookInfoList?.isEmpty() == true) {
@@ -125,9 +145,64 @@ class BookDetailViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getDownloadLocation() {
+
+        viewModelScope.launch {
+            dataStore.getLocation().collect { location ->
+                downloadLocation.value = location
+            }
+        }
+    }
+
+    private fun getDownloadMedium() {
+        viewModelScope.launch {
+            dataStore.getDownloadMedium().collect { medium ->
+                downloadMedium.value = medium
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+     fun downloadBook(favorite: Favorite, activity: MainActivity) {
+
+        val networkInfo = networkConnectivityService.connectivityManager.activeNetworkInfo
+
+        when(getMedium()) {
+            DownloadMedium.WIFI -> {
+                if (networkInfo?.type == NetworkCapabilities.TRANSPORT_WIFI) {
+                    downloadMessage.value = initiateDownload(favorite, activity)
+                }
+                else {
+                    downloadMessage.value = "Not connected to WIFI. Change your settings"
+                }
+            }
+
+            DownloadMedium.CELLULAR -> {
+                if (networkInfo?.type == NetworkCapabilities.TRANSPORT_CELLULAR) {
+                    downloadMessage.value = initiateDownload(favorite, activity)
+                }
+                else {
+                    downloadMessage.value = "Not connected to Cellular Data. Change your settings"
+                }
+            }
+
+            DownloadMedium.BOTH -> {
+                downloadMessage.value = initiateDownload(favorite, activity)
+            }
+        }
+    }
+
+    private fun getMedium(): DownloadMedium {
+        return DownloadMedium.values()
+            .find {
+                it.toPreferenceString() == downloadMedium.value
+            } ?: DownloadMedium.BOTH
+    }
     
+    @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("Range")
-    fun downloadBook(favorite: Favorite, activity: MainActivity): String {
+    fun initiateDownload(favorite: Favorite, activity: MainActivity): String {
 
         if (activity.checkStoragePermission()) {
             val filename = favorite.title.split(" ").joinToString(separator = "+") + ".epub"
@@ -141,8 +216,8 @@ class BookDetailViewModel @Inject constructor(
                 .setTitle(favorite.title)
                 .setDescription(favorite.title + favorite.bookshelves.joinToString(separator = ","))
                 .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    DOWNLOAD_DIR + "/" + filename
+                    defaultDirectory(downloadLocation.value),
+                    filename
                 )
 
             // start downloading.

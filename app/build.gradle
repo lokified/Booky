@@ -112,4 +112,10 @@ dependencies {
     //paging
     implementation "androidx.paging:paging-runtime-ktx:3.2.0-alpha04"
     implementation "androidx.paging:paging-compose:1.0.0-alpha18"
+
+    //datastore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    //document file
+    implementation "androidx.documentfile:documentfile:1.0.1"
 }

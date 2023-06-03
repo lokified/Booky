@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,10 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.loki.booko.domain.models.Favorite
+import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.presentation.MainActivity
 import com.loki.booko.presentation.common.AppTopBar
 import com.loki.booko.util.extensions.getActivity
@@ -38,7 +41,9 @@ fun BookDetailScreen(
 
     val state = viewModel.bookDetailState.value
 
-    val favoriteBookState = viewModel.favoriteBook.collectAsState()
+    val favoriteBookState by viewModel.favoriteBook.collectAsStateWithLifecycle()
+
+    val networkStatus by viewModel.networkStatus.collectAsStateWithLifecycle()
 
     val scaffoldState = rememberScaffoldState()
 
@@ -53,13 +58,12 @@ fun BookDetailScreen(
             if (state.isLoading) {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = "Saving",
-                    duration = SnackbarDuration.Long
                 )
             }
 
             if (state.message.isNotEmpty()) {
                 scaffoldState.snackbarHostState.showSnackbar(
-                    message = favoriteBookState.value.message,
+                    message = favoriteBookState.message,
                     duration = SnackbarDuration.Long
                 )
             }
@@ -83,15 +87,26 @@ fun BookDetailScreen(
                 BottomSection(
                     favorite = it,
                     onDownloadClick = {
-                        val message = viewModel.downloadBook(
-                            favorite = it,
-                            activity = (context.getActivity() as MainActivity)
-                        )
 
-                        coroutineScope.launch {
-                            scaffoldState.snackbarHostState.showSnackbar(
-                                message = message
+                        if (networkStatus == NetworkStatus.Connected) {
+                            viewModel.downloadBook(
+                                favorite = it,
+                                activity = (context.getActivity() as MainActivity)
                             )
+
+                            coroutineScope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    message = viewModel.downloadMessage.value
+                                )
+                            }
+                        }
+
+                        if (networkStatus == NetworkStatus.Disconnected) {
+                            coroutineScope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(
+                                    message = "No network connection"
+                                )
+                            }
                         }
                     }
                 )
