@@ -16,7 +16,7 @@ import com.loki.booko.presentation.book_detail.BookDetailViewModel
 import com.loki.booko.presentation.favorite.FavoriteScreen
 import com.loki.booko.presentation.favorite.FavoriteViewModel
 import com.loki.booko.presentation.home.HomeViewModel
-import com.loki.booko.presentation.home.components.HomeScreen
+import com.loki.booko.presentation.home.HomeScreen
 import com.loki.booko.presentation.search.SearchScreen
 import com.loki.booko.presentation.search.SearchViewModel
 import com.loki.booko.presentation.settings.SettingsScreen

@@ -1,22 +1,27 @@
 package com.loki.booko.presentation.search
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -151,13 +156,11 @@ fun SearchTextFieldSection(
                 onValueChange = { onTermChange(it) },
                 placeholder = {
                     Text(
-                        text = "Enter keywords eg. romance",
-                        color = MaterialTheme.colors.secondary
+                        text = "Enter keywords eg. romance"
                     )
                 },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = MaterialTheme.colors.surface,
-                    unfocusedIndicatorColor = MaterialTheme.colors.surface
+                colors = TextFieldDefaults.colors(
+
                 ),
                 trailingIcon = {
                     IconButton(
@@ -169,7 +172,6 @@ fun SearchTextFieldSection(
                             modifier = Modifier
                                 .padding(2.dp)
                                 .size(35.dp),
-                            tint = MaterialTheme.colors.surface
                         )
                     }
                 },
@@ -203,7 +205,6 @@ fun TermsSection(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Term(
     modifier: Modifier = Modifier,
@@ -212,21 +213,9 @@ fun Term(
     onCancelClick: (Term) -> Unit
 ) {
 
-    val isSelected by remember { mutableStateOf(true) }
-    val selectedBgColor = Color.Transparent
-    val selectedTextColor = MaterialTheme.colors.secondary
-
-    FilterChip(
-        selected = isSelected,
+    AssistChip(
         onClick = { onItemClick(term.searchTerm) },
         modifier = modifier,
-        colors = ChipDefaults.outlinedFilterChipColors(
-            backgroundColor = selectedBgColor,
-        ),
-        border = BorderStroke(
-            width = 1.dp,
-            color = selectedTextColor
-        ),
         shape = RoundedCornerShape(4.dp),
         trailingIcon = {
             IconButton(
@@ -236,19 +225,17 @@ fun Term(
                 Icon(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = "Cancel",
-                    tint = selectedTextColor,
                     modifier = Modifier.size(20.dp)
                 )
             }
+        },
+        label = {
+            Text(
+                text = term.searchTerm,
+                fontSize = 18.sp
+            )
         }
-    ) {
-        Text(
-            text = term.searchTerm,
-            color = selectedTextColor,
-            maxLines = 1,
-            fontSize = 18.sp
-        )
-    }
+    )
 }
 
 @Composable
