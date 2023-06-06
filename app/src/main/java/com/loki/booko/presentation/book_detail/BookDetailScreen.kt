@@ -55,7 +55,7 @@ fun BookDetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = favoriteBookState.isLoading) {
-        if (favoriteBookState.isLoading) {
+        if (favoriteBookState.isLoading && !viewModel.isFavorite.value) {
             snackbarHostState.showSnackbar(
                 message = "Saving",
             )

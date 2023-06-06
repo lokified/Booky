@@ -119,9 +119,12 @@ class BookDetailViewModel @Inject constructor(
                     isLoading = true
                 )
                 favoriteBookRepository.saveBook(favFavorite)
-                _favoriteBook.value = FavoriteBookState(
-                    message = "Book added to favorites"
-                )
+
+                if (!isFavorite.value) {
+                    _favoriteBook.value = FavoriteBookState(
+                        message = "Book added to favorites"
+                    )
+                }
             }
         }
     }
