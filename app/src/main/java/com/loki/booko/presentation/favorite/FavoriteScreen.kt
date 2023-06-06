@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,11 +58,11 @@ fun FavoriteScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
-    ) {
+    ) { padding ->
 
         val state by viewModel.favoriteState.collectAsState()
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
 
             if (state.favoriteList.isNotEmpty()) {
                 FavoritesSection(
@@ -72,7 +76,6 @@ fun FavoriteScreen(
                 if (!state.isLoading) {
                     Text(
                         text = "You have no favorites",
-                        color = MaterialTheme.colors.surface,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -3,15 +3,12 @@ package com.loki.booko.presentation.book_detail
 import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.Context
-import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.loki.booko.data.local.datastore.DataStoreStorage
 import com.loki.booko.domain.models.Favorite
@@ -21,13 +18,13 @@ import com.loki.booko.domain.repository.local.FavoriteBookRepository
 import com.loki.booko.domain.repository.remote.GoogleBookRepository
 import com.loki.booko.domain.use_cases.books.BookUseCase
 import com.loki.booko.presentation.MainActivity
+import com.loki.booko.presentation.MainViewModel
 import com.loki.booko.util.Constants.BOOK_ID
 import com.loki.booko.util.DownloadMedium
 import com.loki.booko.util.Resource
 import com.loki.booko.util.defaultDirectory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,15 +37,15 @@ class BookDetailViewModel @Inject constructor(
     private val favoriteBookRepository: FavoriteBookRepository,
     private val dataStore: DataStoreStorage,
     private val networkConnectivityService: NetworkConnectivityService,
-): ViewModel() {
+): MainViewModel(dataStore) {
 
-    private val _bookDetailState = mutableStateOf(BookDetailState())
-    val bookDetailState: State<BookDetailState> = _bookDetailState
+    private val _bookDetailState = MutableStateFlow(BookDetailState())
+    val bookDetailState = _bookDetailState.asStateFlow()
 
     private val _favoriteBook = MutableStateFlow(FavoriteBookState())
     val favoriteBook = _favoriteBook.asStateFlow()
 
-    val isRead = mutableStateOf(false)
+    val isFavorite = mutableStateOf(false)
 
     val networkStatus: StateFlow<NetworkStatus> = networkConnectivityService.networkStatus.stateIn(
         initialValue = NetworkStatus.Unknown,
@@ -56,16 +53,10 @@ class BookDetailViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000)
     )
 
-    private val downloadLocation = mutableStateOf("")
-    private val downloadMedium = mutableStateOf("")
-    val downloadMessage = mutableStateOf("")
-
     init {
         savedStateHandle.get<Int>(BOOK_ID)?.let { bookId ->
             getBookDetail(bookId)
         }
-        getDownloadLocation()
-        getDownloadMedium()
     }
 
     private fun getBookDetail(bookId: Int) {
@@ -93,6 +84,7 @@ class BookDetailViewModel @Inject constructor(
                         bookSynopsis = bookInfoList?.get(0)?.volumeInfo?.description
                     )
 
+                    getBookIsFavorite(result.data.id)
                 }
 
                 is Resource.Error -> {
@@ -134,31 +126,24 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
-    fun getBookIsRead(favorite: Favorite) {
+    fun removeAsFavorite(book: Favorite) {
         viewModelScope.launch {
-            favoriteBookRepository.getAllBooks().collectLatest { books ->
+            favoriteBookRepository.deleteBook(book)
+            isFavorite.value = false
+            _favoriteBook.value = FavoriteBookState(
+                message = "Book removed as favorite"
+            )
+        }
+    }
+
+    private fun getBookIsFavorite(bookId: Int) {
+        viewModelScope.launch {
+            favoriteBookRepository.getAllBooks().collect { books ->
                 for (i in books.indices) {
-                    if (books[i].id == favorite.id) {
-                        isRead.value  = true
+                    if (books[i].id == bookId) {
+                        isFavorite.value  = true
                     }
                 }
-            }
-        }
-    }
-
-    private fun getDownloadLocation() {
-
-        viewModelScope.launch {
-            dataStore.getLocation().collect { location ->
-                downloadLocation.value = location
-            }
-        }
-    }
-
-    private fun getDownloadMedium() {
-        viewModelScope.launch {
-            dataStore.getDownloadMedium().collect { medium ->
-                downloadMedium.value = medium
             }
         }
     }
@@ -191,13 +176,6 @@ class BookDetailViewModel @Inject constructor(
                 downloadMessage.value = initiateDownload(favorite, activity)
             }
         }
-    }
-
-    private fun getMedium(): DownloadMedium {
-        return DownloadMedium.values()
-            .find {
-                it.toPreferenceString() == downloadMedium.value
-            } ?: DownloadMedium.BOTH
     }
     
     @RequiresApi(Build.VERSION_CODES.S)

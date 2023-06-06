@@ -1,15 +1,15 @@
-package com.loki.booko.presentation.home.components
+package com.loki.booko.presentation.home
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +26,6 @@ import com.loki.booko.domain.models.BookItem
 import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.presentation.common.BookItem
 import com.loki.booko.presentation.common.AppTopBar
-import com.loki.booko.presentation.home.HomeViewModel
 import com.loki.booko.presentation.navigation.Screens
 
 @Composable
@@ -136,7 +135,7 @@ fun HomeScreen(
 fun ErrorSection(
     modifier: Modifier = Modifier,
     message: String,
-    color: Color = MaterialTheme.colors.error,
+    color: Color = MaterialTheme.colorScheme.error,
 ) {
     Text(
         text = message,

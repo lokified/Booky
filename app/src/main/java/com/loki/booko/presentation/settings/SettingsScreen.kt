@@ -1,11 +1,12 @@
 package com.loki.booko.presentation.settings
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,12 +16,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +44,6 @@ import com.loki.booko.util.DownloadMedium
 import com.loki.booko.util.getDirectoryPathFromUri
 import com.loki.booko.util.getSelectedMedium
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun SettingsScreen(
     navController: NavController,
@@ -74,9 +75,13 @@ fun SettingsScreen(
                 navController = navController
             )
         }
-    ) {
+    ) { padding ->
 
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(padding)
+        ) {
             HeaderSection(
                 title = "Downloads",
                 modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
@@ -89,7 +94,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
             )
 
-            val value = remember { viewModel.downloadMedium.value }
+
             var isDialogVisible by remember { mutableStateOf(false) }
 
             ContentSection(
@@ -148,38 +153,44 @@ fun DownloadMediumPopUp(
 
         val medium = listOf("Cellular data", "Wifi", "Cellular data and Wifi")
 
-        Column(modifier = modifier.fillMaxWidth()) {
+        Card {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
 
-            Text(text = "Download over")
+                Text(text = "Download over")
 
-            medium.forEach {
+                medium.forEach {
 
-                Row(
-                    verticalAlignment = CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selected = it
+                    Row(
+                        verticalAlignment = CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selected = it
 
-                            getSelectedMedium(
-                                value = it,
-                                selectedValue = { selectedValue(it) }
-                            )
-                        }
-                ) {
-                    RadioButton(
-                        selected = selected == it,
-                        onClick = {
-                            selected = it
+                                getSelectedMedium(
+                                    value = it,
+                                    selectedValue = { selectedValue(it) }
+                                )
+                            }
+                    ) {
+                        RadioButton(
+                            selected = selected == it,
+                            onClick = {
+                                selected = it
 
-                            getSelectedMedium(
-                                value = it,
-                                selectedValue = { selectedValue(it) }
-                            )
-                        },
-                    )
+                                getSelectedMedium(
+                                    value = it,
+                                    selectedValue = { selectedValue(it) }
+                                )
+                            },
+                        )
 
-                    Text(text = it)
+                        Text(text = it)
+                    }
                 }
             }
         }
@@ -195,30 +206,40 @@ fun ContentSection(
     trailingIcon: ImageVector = Icons.Default.ArrowForwardIos,
     onSectionClick: () -> Unit
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onSectionClick() },
-        verticalAlignment = CenterVertically,
-        horizontalArrangement = Arrangement.Center
+
+    Box(
+        modifier = Modifier
+            .clickable {
+                onSectionClick()
+            }
     ) {
 
-        Column(
-            verticalArrangement = Arrangement.Center,
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            verticalAlignment = CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = content)
-            Text(
-                text = subContent,
-                fontSize = 12.sp
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(text = content)
+                Text(
+                    text = subContent,
+                    fontSize = 12.sp
+                )
+            }
+
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Icon(
+                imageVector = trailingIcon,
+                contentDescription = null
             )
         }
-
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Icon(
-            imageVector = trailingIcon,
-            contentDescription = null
-        )
     }
+
 }

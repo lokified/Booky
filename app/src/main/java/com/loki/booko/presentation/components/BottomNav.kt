@@ -1,8 +1,11 @@
 package com.loki.booko.presentation.components
 
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,19 +26,16 @@ fun BottomNav(
     val bottomBarDestination = navItems.any { it.route == currentDestination?.route }
 
     if (bottomBarDestination) {
-        BottomNavigation(
+        NavigationBar(
             modifier = modifier,
-            backgroundColor = MaterialTheme.colors.background
         ) {
 
             navItems.forEach { bottomNavItem ->
 
                 val selected = bottomNavItem.route == backStackEntry?.destination?.route
 
-                BottomNavigationItem(
+                NavigationBarItem(
                     selected = selected,
-                    selectedContentColor = MaterialTheme.colors.onBackground,
-                    unselectedContentColor = MaterialTheme.colors.primaryVariant,
                     onClick = { onItemClick(bottomNavItem) },
                     icon = {
                         Icon(

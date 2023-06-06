@@ -1,5 +1,6 @@
 package com.loki.booko.data.local.datastore
 
+import android.os.Environment
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -20,7 +21,7 @@ class DataStoreStorageImpl @Inject constructor(
     }
 
     override suspend fun getLocation(): Flow<String> = dataStore
-        .data.map { it[LOCATION_KEY] ?: "" }
+        .data.map { it[LOCATION_KEY] ?: Environment.DIRECTORY_DOWNLOADS }
 
     override suspend fun setDownloadMedium(medium: String) {
         dataStore.edit { preference ->

@@ -1,72 +1,72 @@
 package com.loki.booko.presentation.book_detail
 
-import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
 import com.loki.booko.domain.models.Favorite
 import com.loki.booko.domain.network_service.NetworkStatus
 import com.loki.booko.presentation.MainActivity
 import com.loki.booko.presentation.common.AppTopBar
+import com.loki.booko.util.TextUtils
 import com.loki.booko.util.extensions.getActivity
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun BookDetailScreen(
     navController: NavController,
-    viewModel: BookDetailViewModel
+    viewModel: BookDetailViewModel,
 ) {
 
-    val state = viewModel.bookDetailState.value
-
+    val bookState by viewModel.bookDetailState.collectAsStateWithLifecycle()
     val favoriteBookState by viewModel.favoriteBook.collectAsStateWithLifecycle()
-
     val networkStatus by viewModel.networkStatus.collectAsStateWithLifecycle()
-
-    val scaffoldState = rememberScaffoldState()
-
     val context = LocalContext.current
-
+    val snackbarHostState = SnackbarHostState()
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = state.isLoading) {
+    LaunchedEffect(key1 = favoriteBookState.isLoading) {
+        if (favoriteBookState.isLoading) {
+            snackbarHostState.showSnackbar(
+                message = "Saving",
+            )
+        }
+    }
 
-        viewModel.favoriteBook.collectLatest { state ->
-
-            if (state.isLoading) {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = "Saving",
-                )
-            }
-
-            if (state.message.isNotEmpty()) {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = favoriteBookState.message,
-                    duration = SnackbarDuration.Long
-                )
-            }
+    LaunchedEffect(key1 = favoriteBookState.message ) {
+        if (favoriteBookState.message.isNotEmpty()) {
+            snackbarHostState.showSnackbar(
+                message = favoriteBookState.message,
+            )
         }
     }
 
@@ -81,9 +81,12 @@ fun BookDetailScreen(
                 }
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         bottomBar = {
 
-            state.favorite?.let {
+            bookState.favorite?.let {
                 BottomSection(
                     favorite = it,
                     onDownloadClick = {
@@ -95,7 +98,7 @@ fun BookDetailScreen(
                             )
 
                             coroutineScope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = viewModel.downloadMessage.value
                                 )
                             }
@@ -103,7 +106,7 @@ fun BookDetailScreen(
 
                         if (networkStatus == NetworkStatus.Disconnected) {
                             coroutineScope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(
+                                snackbarHostState.showSnackbar(
                                     message = "No network connection"
                                 )
                             }
@@ -112,12 +115,14 @@ fun BookDetailScreen(
                 )
             }
         },
-        scaffoldState = scaffoldState
-    ){
+    ){ padding ->
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
 
-            if (state.isLoading) {
+            if (bookState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -131,62 +136,49 @@ fun BookDetailScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
 
-                    state.favorite?.let { book ->
+                    bookState.favorite?.let { book ->
                         TopSection(
                             modifier = Modifier.padding(16.dp),
                             favorite = book
                         )
+
+                        MidSection(
+                            bookItem = book,
+                            isFavorite = viewModel.isFavorite.value,
+                            onFavoriteClick = {
+                                if (!viewModel.isFavorite.value) {
+                                    viewModel.saveAsFavorite(book)
+                                }
+                                if (viewModel.isFavorite.value) {
+                                    viewModel.removeAsFavorite(book)
+                                }
+                            },
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    bookState.bookSynopsis?.let { synopsis ->
 
-                    Text(
-                        text = "Synopsis",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(start = 16.dp),
-                    )
+                        Text(
+                            text = "Synopsis",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 16.dp),
+                        )
 
-                    state.bookSynopsis?.let { synopsis ->
                         Text(
                             text = synopsis,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(16.dp),
                         )
                     }
-
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-
-                        viewModel.getBookIsRead(state.favorite!!)
-
-                        val isRead = viewModel.isRead.value
-
-                        val favText = if (isRead) "Favorite" else "Save to Favorite"
-
-                        TextButton(
-                            onClick = {
-                                if (!isRead) {
-                                    viewModel.saveAsFavorite(state.favorite)
-                                }
-                            }
-                        ) {
-
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "Favorite"
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = favText)
-                        }
-
-                    }
                 }
             }
 
-            if (state.errorMessage.isNotBlank()) {
+            if (bookState.errorMessage.isNotBlank()) {
                 Text(
-                    text = state.errorMessage,
-                    color = MaterialTheme.colors.error,
+                    text = bookState.errorMessage,
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -198,7 +190,6 @@ fun BookDetailScreen(
     }
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun TopSection(
     modifier: Modifier = Modifier,
@@ -211,13 +202,8 @@ fun TopSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-
-            val painter = rememberImagePainter(
-                data = favorite.formats.imagejpeg
-            )
-
-            Image(
-                painter = painter,
+            AsyncImage(
+                model = favorite.formats.imagejpeg,
                 contentDescription = "Book_Image",
                 modifier = Modifier.size(
                     width = 200.dp,
@@ -227,36 +213,73 @@ fun TopSection(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+            Text(
+                text = favorite.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                maxLines = 2
+            )
+        }
+    }
+}
+
+
+@Composable
+fun MidSection(
+    modifier: Modifier = Modifier,
+    bookItem: Favorite,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit
+) {
+
+    val authors = TextUtils.getAuthorsAsString(bookItem.author!!)
+    val languages = TextUtils.getLanguagesAsString(bookItem.languages)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(4.dp)
+            )
+
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(8.dp)
+        ) {
+
+            Column (
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Language")
+                Text(text = languages)
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(text = "Authors")
+                Text(text = authors!!)
+            }
+            Spacer(modifier = Modifier.weight(1f))
 
-                Text(
-                    text = favorite.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colors.surface,
-                    maxLines = 2
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val authors = favorite.author?.map { it.name }?.joinToString(separator = ",")
-                Text(
-                    text = "Author(s) | $authors",
-                    fontSize = 15.sp,
-                    fontStyle = FontStyle.Italic,
-                    maxLines = 2
-                )
-
-                val languages = favorite.languages.joinToString(separator = ",")
-
-                Text(
-                    text = "Language(s) | $languages",
-                    fontSize = 16.sp,
-                    maxLines = 2
-                )
+            Box(contentAlignment = Alignment.Center) {
+                IconButton(
+                    onClick = {
+                        onFavoriteClick()
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (!isFavorite) Icons.Outlined.FavoriteBorder else Icons.Default.Favorite,
+                        contentDescription = null
+                    )
+                }
             }
         }
     }
@@ -269,10 +292,8 @@ fun BottomSection(
     onDownloadClick: () -> Unit
 ) {
 
-    Box(modifier = modifier
-        .background(
-            color = MaterialTheme.colors.surface
-        )
+    Box(
+        modifier = modifier
     ) {
 
         Row(
@@ -284,8 +305,7 @@ fun BottomSection(
             Text(
                 text = "${favorite.download_count} Downloads",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colors.onSurface
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -298,8 +318,7 @@ fun BottomSection(
                     imageVector = Icons.Default.Download,
                     contentDescription = "Download",
                     modifier = modifier
-                        .padding(4.dp),
-                    tint = MaterialTheme.colors.onSurface
+                        .padding(4.dp)
                 )
             }
         }

@@ -1,14 +1,19 @@
 package com.loki.booko.presentation.common
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -16,6 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.loki.booko.presentation.navigation.Screens
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
     title: String,
@@ -25,14 +31,10 @@ fun AppTopBar(
 ) {
 
     TopAppBar(
-        modifier = Modifier.background(
-            color = MaterialTheme.colors.surface
-        ),
         title = {
             Text(
                 text = title,
                 fontSize = 18.sp,
-                color = MaterialTheme.colors.onSurface
             ) },
         actions = {
             val backStackEntry by navController.currentBackStackEntryAsState()
@@ -74,22 +76,24 @@ fun AppTopBar(
                         DropdownMenuItem(
                             onClick = {
                                 navController.navigate(Screens.SearchScreen.route)
+                            },
+                            text = {
+                                Text(text = "Search")
                             }
-                        ) {
-                            Text(text = "Search")
-                        }
+                        )
 
                         DropdownMenuItem(
                             onClick = {
                                 onDeleteAllClicked()
                                 menuExpanded = false
+                            },
+                            text = {
+                                Text(
+                                    text = "Delete All",
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
-                        ) {
-                            Text(
-                                text = "Delete All",
-                                color = MaterialTheme.colors.error
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -112,7 +116,6 @@ fun TopBarIcon(
     onIconClicked: () -> Unit,
     description: String,
     icon: ImageVector,
-    tint: Color = MaterialTheme.colors.onSurface
 ) {
 
     IconButton(
@@ -124,7 +127,6 @@ fun TopBarIcon(
             contentDescription = description,
             modifier = modifier
                 .padding(4.dp),
-            tint = tint
         )
     }
 }
