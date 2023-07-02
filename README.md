@@ -25,7 +25,7 @@ The app uses mvvm clean architecture. This includes;
 The app uses these technologies;
 
 - Kotlin - App is built with the language.
-- XML - UI uses xml and fragments.
+- Jetpack compose for UI.
 - Retrofit- For networking.
 - Hilt - For dependency injection.
 - Jetpack components;
